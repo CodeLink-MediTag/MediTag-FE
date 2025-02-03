@@ -16,11 +16,13 @@ class MyApp extends StatelessWidget{
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           textTheme: TextTheme(
-              bodyLarge: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700]
-              )
+            bodyLarge: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+            ),
+
+
           ),
           // elevatedButtonTheme: ElevatedButtonThemeData(
           //     style: ElevatedButton.styleFrom(
