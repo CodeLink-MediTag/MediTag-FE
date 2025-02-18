@@ -28,18 +28,93 @@ class _MainScreenState extends State<MainScreen> {
     '비타민_2': '오후 08:00',
   };
 
+  Map<String, String> originalTimes = {}; // 원래 시간 저장용
+
+  @override
+  void initState() {
+    super.initState();
+    originalTimes.addAll(medicationTimes);
+  }
+
   void toggleTime(String key) {
     setState(() {
       if (medicationTimes[key] == '복용 완료!') {
-        if (key.contains('비타민')) {
-          medicationTimes[key] = key == '비타민_1' ? '오전 09:00' : '오후 08:00';
-        } else {
-          medicationTimes[key] = key == '처방약_1' ? '오전 09:00' : key == '처방약_2' ? '오후 02:00' : '오후 08:00';
-        }
+        medicationTimes[key] = originalTimes[key]!; // 원래 시간으로 복구
       } else {
-        medicationTimes[key] = '복용 완료!';
+        _showMedicationDialog(key);
       }
     });
+  }
+
+  void _confirmMedication(String key) {
+    setState(() {
+      medicationTimes[key] = '복용 완료!';
+    });
+  }
+
+  void _showMedicationDialog(String key) {
+    String currentTime = medicationTimes[key]!;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            width: 330,
+            height: 210,
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "처방약",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "$currentTime에 약을 드셨나요?",
+                  style: TextStyle(fontSize: 19, color: Colors.grey),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        fixedSize: Size(128, 54), // 크기 고정
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        _confirmMedication(key); // "복용 완료!"로 변경
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "네",
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.grey.shade300,
+                        fixedSize: Size(128, 54),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () => Navigator.pop(context), // '아니요' 누르면 그대로 유지
+                      child: Text(
+                        "아니요",
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black), // 검정색 폰트
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -144,7 +219,13 @@ class _MainScreenState extends State<MainScreen> {
           minimumSize: Size(86, 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        onPressed: () => toggleTime(key),
+        onPressed: () {
+          if (medicationTimes[key] == '복용 완료!') {
+            toggleTime(key); // 팝업 없이 원래 시간으로 복구
+          } else {
+            _showMedicationDialog(key); // 팝업 띄우기
+          }
+        },
         child: Text(
           medicationTimes[key]!,
           style: TextStyle(fontSize: 14, color: medicationTimes[key] == '복용 완료!' ? Colors.white : Colors.black),
