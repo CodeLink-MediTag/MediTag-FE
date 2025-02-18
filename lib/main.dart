@@ -1,41 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart'; // ✅ 추가!
+import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // ✅ Flutter 엔진 초기화
+  await initializeDateFormatting('ko_KR', null); // ✅ 한국어 날짜 포맷 사용 가능하도록 설정
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MedicineScheduleScreen(),
+      home: AlarmRegistrationScreen(),
     );
   }
 }
 
-class MedicineScheduleScreen extends StatefulWidget {
+class AlarmRegistrationScreen extends StatefulWidget {
+  const AlarmRegistrationScreen({super.key});
+
   @override
-  _MedicineScheduleScreenState createState() => _MedicineScheduleScreenState();
+  AlarmRegistrationScreenState createState() => AlarmRegistrationScreenState();
 }
 
-class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
-  String? selectedTime = "아침"; // 복용 주기 선택
-  String? selectedPeriod = "3일"; // 복용 기간 선택
-  TextEditingController customDaysController = TextEditingController();
-  DateTime selectedDate = DateTime.now();
+class AlarmRegistrationScreenState extends State<AlarmRegistrationScreen> {
+  List<TimeOfDay> alarmTimes = [
+    const TimeOfDay(hour: 8, minute: 0),
+    const TimeOfDay(hour: 13, minute: 0),
+    const TimeOfDay(hour: 18, minute: 0),
+  ];
+  File? selectedImage;
 
-  // 날짜 선택 함수
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  // 시간 선택 함수
+  Future<void> selectTime(BuildContext context, int index) async {
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialTime: alarmTimes[index],
     );
-    if (picked != null && picked != selectedDate) {
+    if (picked != null) {
       setState(() {
-        selectedDate = picked;
+        alarmTimes[index] = picked;
+      });
+    }
+  }
+
+  // 사진 선택 함수
+  Future<void> pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        selectedImage = File(pickedFile.path);
       });
     }
   }
@@ -51,14 +71,14 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
             Container(
               height: 60,
               color: Colors.blue,
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
                     onPressed: () {},
                   ),
-                  Expanded(
+                  const Expanded(
                     child: Center(
                       child: Text(
                         '복약 알림 등록',
@@ -66,158 +86,91 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 40),
+                  const SizedBox(width: 40),
                 ],
               ),
             ),
 
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ListView(
                   children: [
-                    SizedBox(height: 20),
-                    Text(
-                      "복용 주기, 복용 시작 날짜, 기간을 입력해주세요!",
+                    const SizedBox(height: 20),
+                    const Text(
+                      "마지막으로 알림을 원하는 시간을 등록해주세요!\n사진이 있다면 사진을 등록해도 좋아요.",
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                    // 복용 주기
-                    Text("복용 주기", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
-                      children: ["아침", "점심", "저녁"].map((time) {
-                        return Row(
-                          children: [
-                            Radio(
-                              value: time,
-                              groupValue: selectedTime,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedTime = value as String;
-                                });
-                              },
-                            ),
-                            Text(time, style: TextStyle(fontSize: 14)),
-                            SizedBox(width: 10), // 요소 간격 추가
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                    SizedBox(height: 20),
-
-                    // 복용 시작 날짜
-                    Text("복용 시작 날짜", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _selectDate(context),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("${selectedDate.toLocal()}".split(' ')[0], style: TextStyle(fontSize: 16)),
-                            Icon(Icons.edit, color: Colors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    // 복용 기간
-                    Text("복용 기간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
+                    // 알림 시간
+                    const Text("알림 시간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
 
                     Column(
-                      children: ["3일", "5일", "1개월", "1년", "매일"].map((period) {
+                      children: List.generate(alarmTimes.length, (index) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5), // 간격 추가
-                          child: Container(
-                            width: 358,
-                            height: 53,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: RadioListTile(
-                              title: Text(period, style: TextStyle(fontSize: 20)),
-                              value: period,
-                              groupValue: selectedPeriod,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedPeriod = value as String;
-                                });
-                              },
-                              activeColor: Colors.blue,
-                              controlAffinity: ListTileControlAffinity.trailing, // 동그라미 오른쪽 정렬
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: GestureDetector(
+                            onTap: () => selectTime(context, index),
+                            child: Container(
+                              height: 53,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    DateFormat('a hh:mm', 'ko_KR').format(
+                                      DateTime(2000, 1, 1, alarmTimes[index].hour, alarmTimes[index].minute),
+                                    ),
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  const Icon(Icons.access_time, color: Colors.grey),
+                                ],
+                              ),
                             ),
                           ),
                         );
-                      }).toList(),
+                      }),
                     ),
+                    const SizedBox(height: 20),
 
-                    // 기타 기간 입력 (길이 3일과 동일하게)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 5), // 간격 추가
+                    // 사진 업로드
+                    const Text("사진", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: pickImage,
                       child: Container(
-                        width: 358,
                         height: 53,
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 16),
-                              child: Row(
-                                children: [
-                                  Text("기타: ", style: TextStyle(fontSize: 20)),
-                                  SizedBox(
-                                    width: 70,
-                                    child: TextField(
-                                      controller: customDaysController,
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        hintText: "1~9999",
-                                        border: InputBorder.none,
-                                      ),
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                  ),
-                                  Text(" 일", style: TextStyle(fontSize: 20)),
-                                ],
-                              ),
-                            ),
-                            Radio(
-                              value: "기타",
-                              groupValue: selectedPeriod,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedPeriod = "기타";
-                                });
-                              },
-                            ),
+                            selectedImage == null
+                                ? const Text("사진이 있다면 등록해주세요!", style: TextStyle(fontSize: 16, color: Colors.grey))
+                                : const Text("사진 선택됨", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const Icon(Icons.image, color: Colors.grey),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(height: 40),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
             ),
 
-            // 다음 버튼
+            // 등록 버튼
             Padding(
-              padding: EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: 20),
               child: SizedBox(
                 width: 358,
                 height: 48,
@@ -226,9 +179,11 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  onPressed: () {},
-                  child: Text(
-                    "다음",
+                  onPressed: () {
+                    // 알림 등록 로직 추가 가능
+                  },
+                  child: const Text(
+                    "등록",
                     style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
