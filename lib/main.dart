@@ -9,12 +9,37 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MedicineRegistrationScreen(),
+      home: MedicineScheduleScreen(),
     );
   }
 }
 
-class MedicineRegistrationScreen extends StatelessWidget {
+class MedicineScheduleScreen extends StatefulWidget {
+  @override
+  _MedicineScheduleScreenState createState() => _MedicineScheduleScreenState();
+}
+
+class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
+  String? selectedTime = "아침"; // 복용 주기 선택
+  String? selectedPeriod = "3일"; // 복용 기간 선택
+  TextEditingController customDaysController = TextEditingController();
+  DateTime selectedDate = DateTime.now();
+
+  // 날짜 선택 함수
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,20 +49,20 @@ class MedicineRegistrationScreen extends StatelessWidget {
           children: [
             // AppBar
             Container(
-              height: 60, // 앱바 높이 줄임
+              height: 60,
               color: Colors.blue,
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.close, color: Colors.white, size: 30),
+                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
                     onPressed: () {},
                   ),
                   Expanded(
                     child: Center(
                       child: Text(
                         '복약 알림 등록',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                   ),
@@ -48,96 +73,164 @@ class MedicineRegistrationScreen extends StatelessWidget {
 
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: ListView(
                   children: [
-                    SizedBox(height: 30), // 여백 조정
+                    SizedBox(height: 20),
                     Text(
-                      "약의 이름과 특징을 입력해 주세요!",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      "복용 주기, 복용 시작 날짜, 기간을 입력해주세요!",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 30), // 여백 추가
+                    SizedBox(height: 20),
 
-                    // 이름 등록
-                    Text("이름 등록", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    // 복용 주기
+                    Text("복용 주기", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     SizedBox(height: 8),
-                    SizedBox(
-                      width: 358,
-                      height: 48,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "이름을 지어주세요! 예) 처방약, 비타민B",
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
+                      children: ["아침", "점심", "저녁"].map((time) {
+                        return Row(
+                          children: [
+                            Radio(
+                              value: time,
+                              groupValue: selectedTime,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedTime = value as String;
+                                });
+                              },
+                            ),
+                            Text(time, style: TextStyle(fontSize: 14)),
+                            SizedBox(width: 10), // 요소 간격 추가
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 20),
+
+                    // 복용 시작 날짜
+                    Text("복용 시작 날짜", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => _selectDate(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("${selectedDate.toLocal()}".split(' ')[0], style: TextStyle(fontSize: 16)),
+                            Icon(Icons.edit, color: Colors.grey),
+                          ],
                         ),
                       ),
                     ),
                     SizedBox(height: 20),
 
-                    // 특징 등록
-                    Text("특징 등록", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    // 복용 기간
+                    Text("복용 기간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     SizedBox(height: 8),
-                    SizedBox(
-                      width: 358,
-                      height: 48,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "특징을 등록해 주세요! 예) 동그란 통, 사각 통",
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.grey),
+
+                    Column(
+                      children: ["3일", "5일", "1개월", "1년", "매일"].map((period) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5), // 간격 추가
+                          child: Container(
+                            width: 358,
+                            height: 53,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: RadioListTile(
+                              title: Text(period, style: TextStyle(fontSize: 20)),
+                              value: period,
+                              groupValue: selectedPeriod,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedPeriod = value as String;
+                                });
+                              },
+                              activeColor: Colors.blue,
+                              controlAffinity: ListTileControlAffinity.trailing, // 동그라미 오른쪽 정렬
+                            ),
                           ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                        );
+                      }).toList(),
+                    ),
+
+                    // 기타 기간 입력 (길이 3일과 동일하게)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5), // 간격 추가
+                      child: Container(
+                        width: 358,
+                        height: 53,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 16),
+                              child: Row(
+                                children: [
+                                  Text("기타: ", style: TextStyle(fontSize: 20)),
+                                  SizedBox(
+                                    width: 70,
+                                    child: TextField(
+                                      controller: customDaysController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        hintText: "1~9999",
+                                        border: InputBorder.none,
+                                      ),
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  ),
+                                  Text(" 일", style: TextStyle(fontSize: 20)),
+                                ],
+                              ),
+                            ),
+                            Radio(
+                              value: "기타",
+                              groupValue: selectedPeriod,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedPeriod = "기타";
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ),
-
-                    Spacer(), // 버튼을 아래로 밀어줌
-
-                    // 버튼들
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: 358,
-                          height: 48,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () {},
-                            child: Text(
-                              "처방약 등록",
-                              style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        SizedBox(
-                          width: 358,
-                          height: 48,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () {},
-                            child: Text(
-                              "다음",
-                              style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20), // 마지막 여백 추가
-                      ],
-                    ),
+                    SizedBox(height: 40),
                   ],
+                ),
+              ),
+            ),
+
+            // 다음 버튼
+            Padding(
+              padding: EdgeInsets.only(bottom: 20),
+              child: SizedBox(
+                width: 358,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    "다음",
+                    style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
