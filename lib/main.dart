@@ -9,22 +9,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Settings(),
+      home: AlertSound(),
     );
   }
 }
 
-class Settings extends StatefulWidget {
+class AlertSound extends StatefulWidget {
   @override
-  _SettingsPageState createState() => _SettingsPageState();
+  _AlertSoundPageState createState() => _AlertSoundPageState();
 }
 
-class _SettingsPageState extends State<Settings> {
-  bool notifications = true;
-  bool sound = true;
-  bool vibration = true;
-  bool showNotifications = false;
-  double textSize = 14.0;
+class _AlertSoundPageState extends State<AlertSound> {
+  String selectedSound = "";
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +43,7 @@ class _SettingsPageState extends State<Settings> {
                 ),
                 Center(
                   child: Text(
-                    '환경설정',
+                    '알림음',
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -58,117 +54,31 @@ class _SettingsPageState extends State<Settings> {
               ],
             ),
           ),
-          Expanded(
-            child: Container(
-              color: Color(0xFFF6F6F6), // 연한 회색 배경
-              child: Column(
-                children: [
-                  _buildSettingTile('알림', Switch(
-                    value: notifications,
-                    onChanged: (value) {
-                      setState(() => notifications = value);
-                    },
-                    activeColor: Colors.blue,
-                  )),
-                  _buildDivider(),
-                  _buildSettingTile('소리', Switch(
-                    value: sound,
-                    onChanged: (value) {
-                      setState(() => sound = value);
-                    },
-                    activeColor: Colors.blue,
-                  )),
-                  _buildDivider(),
-                  _buildNavigationButton('알림음', () {}),
-                  _buildDivider(),
-                  _buildSettingTile('진동', Switch(
-                    value: vibration,
-                    onChanged: (value) {
-                      setState(() => vibration = value);
-                    },
-                    activeColor: Colors.blue,
-                  )),
-                  _buildDivider(),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    color: Color(0xFFFDFDFD), // 글자 크기 바탕색
-                    child: Column(
-                      children: [
-                        Text(
-                          '글자 크기',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-                        ),
-                        Slider(
-                          value: textSize,
-                          min: 10,
-                          max: 24,
-                          divisions: 7,
-                          label: textSize.toString(),
-                          onChanged: (value) {
-                            setState(() => textSize = value);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildSettingTile('알림 표시', Switch(
-                    value: showNotifications,
-                    onChanged: (value) {
-                      setState(() => showNotifications = value);
-                    },
-                    activeColor: Colors.blue,
-                  )),
-                  _buildDivider(),
-                  _buildNavigationButton('NFC 등록', () {}),
-                  _buildDivider(),
-                  Spacer(),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 20), // 로그아웃 버튼 아래 여백 추가
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF547EE8),
-                        minimumSize: Size(double.infinity, 50),
-                      ),
-                      child: Text(
-                        '로그아웃',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildSoundTile('알림음1'),
+          _buildDivider(),
+          _buildSoundTile('알림음2'),
+          _buildDivider(),
+          _buildSoundTile('알림음3'),
         ],
       ),
     );
   }
 
-  Widget _buildSettingTile(String title, Widget trailing) {
+  Widget _buildSoundTile(String soundName) {
     return Container(
-      color: Color(0xFFFDFDFD), // 설정 항목 배경 흰색
+      color: Colors.white, // 알림음 칸만 흰색
       child: ListTile(
         title: Text(
-          title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400), // 알림, 소리, 진동, 알림표시 글씨
+          soundName,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400), // 폰트 크기 20, Regular 적용
         ),
-        trailing: trailing,
-      ),
-    );
-  }
-
-  Widget _buildNavigationButton(String title, VoidCallback onPressed) {
-    return Container(
-      color: Color(0xFFFDFDFD), // 설정 항목 배경 흰색
-      child: ListTile(
-        title: Text(
-          title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+        trailing: Checkbox(
+          value: selectedSound == soundName,
+          onChanged: (value) {
+            setState(() => selectedSound = value! ? soundName : "");
+          },
+          activeColor: Color(0xFF61B781), /// 체크박스 반응색
         ),
-        trailing: Icon(Icons.arrow_forward_ios, color: Colors.black, size: 20), // 버튼 대신 아이콘
-        onTap: onPressed, // 아이콘 클릭 시 이동
       ),
     );
   }
@@ -177,6 +87,7 @@ class _SettingsPageState extends State<Settings> {
     return Container(
       height: 2,
       color: Color(0xFFDADADA),
+      width: double.infinity, // 좌우 여백 없이 끝까지
     );
   }
 }
