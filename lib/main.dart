@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR', null);
   runApp(MyApp());
 }
 
@@ -9,56 +13,33 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ChatBot(),
+      home: MedicineCheck(),
     );
   }
 }
 
-class ChatBot extends StatefulWidget {
+class MedicineCheck extends StatefulWidget {
   @override
-  _ChatBotPageState createState() => _ChatBotPageState();
+  _MedicineCheckPageState createState() => _MedicineCheckPageState();
 }
 
-class _ChatBotPageState extends State<ChatBot> {
-  final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> messages = [];
-  final ScrollController _scrollController = ScrollController();
-
-  void _sendMessage() {
-    String text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        messages.add({'type': 'user', 'text': text});
-        messages.add({'type': 'bot', 'text': '자동 응답: "$text"에 대한 답변입니다.'});
-      });
-      _controller.clear();
-      _scrollToBottom();
-    }
-  }
-
-  void _scrollToBottom() {
-    Future.delayed(Duration(milliseconds: 100), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
-  }
+class _MedicineCheckPageState extends State<MedicineCheck> {
+  bool isTaken = false;
 
   @override
   Widget build(BuildContext context) {
+    String todayDate = DateFormat('MM/dd일 EEEE', 'ko_KR').format(DateTime.now());
+
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
-      body: Stack(
+      backgroundColor: Colors.grey[900],
+      body: Column(
         children: [
-          Column(
-            children: [
-              // 상단 바
-              Container(
-                color: Color(0xFF547EE8),
-                padding: EdgeInsets.only(top: 32, bottom: 16),
-                child: Row(
+          Container(
+            color: Color(0xFF547EE8), //상단바 컬러
+            padding: EdgeInsets.only(top: 32, bottom: 16), // 상단바 위쪽 높이 증가
+            child: Column(
+              children: [
+                Row(
                   children: [
                     IconButton(
                       icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -67,9 +48,9 @@ class _ChatBotPageState extends State<ChatBot> {
                     Expanded(
                       child: Center(
                         child: Text(
-                          '챗봇',
+                          todayDate,
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -82,119 +63,76 @@ class _ChatBotPageState extends State<ChatBot> {
                     ),
                   ],
                 ),
-              ),
-
-              // 메시지 리스트
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: EdgeInsets.all(16),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    return msg['type'] == 'user'
-                        ? _buildUserMessage(msg['text']!)
-                        : _buildBotMessage(msg['text']!);
-                  },
-                ),
-              ),
-
-              // 입력창 & 버튼
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                color: Colors.white,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        decoration: InputDecoration(
-                          hintText: '메시지 입력...',
-                          filled: true,
-                          fillColor: Color(0xFFF6F6F6),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        onSubmitted: (value) => _sendMessage(),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(16),
+              color: Colors.white,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '아침 약 입니다\n아침 약 드셨나요?',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                    SizedBox(width: 10),
-                    IconButton(
-                      icon: Icon(Icons.send, color: Color(0xFF547EE8)),
-                      onPressed: _sendMessage,
+                  ),
+                  SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isTaken = true;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isTaken ? Color(0xFFA3BCF1) : Color(0xFF547EE8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      minimumSize: Size(450, 200),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // 중앙 음성 녹음 아이콘
-          Positioned(
-            bottom: 70,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: FloatingActionButton(
-                backgroundColor: Color(0xFF547EE8),
-                onPressed: () {},
-                child: Icon(Icons.mic, color: Colors.white, size: 28),
+                    child: Text(
+                      isTaken ? '복용완료' : '네',
+                      style: TextStyle(fontSize: 33, color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 100),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF547EE8),
+                      minimumSize: Size(double.infinity, 50),
+                    ),
+                    child: Text(
+                      '복용 기록보기',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF547EE8),
+                      minimumSize: Size(double.infinity, 50),
+                    ),
+                    child: Text(
+                      '챗봇에게 질문하기',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildUserMessage(String message) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 10),
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: Color(0xFFDADADA),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          message,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBotMessage(String message) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 10),
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Color(0xFF547EE8),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '음성답변',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              message,
-              style: TextStyle(fontSize: 14, color: Colors.white),
-            ),
-          ],
-        ),
       ),
     );
   }
