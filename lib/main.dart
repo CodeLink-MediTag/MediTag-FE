@@ -1,125 +1,185 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        textTheme: TextTheme(
+          bodyMedium: TextStyle(color: Colors.black),
+        ),
+      ),
+      home: MainPage(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainPage extends StatelessWidget {
+  const MainPage({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return Scaffold(
+      backgroundColor: Color(0xFFF6F6F6),
+      body: Stack(
+        children: [
+          // 외부 박스 (가로로 꽉 채우고 위쪽 선만 표시)
+          Positioned(
+            top: 260, // 사진 바로 아래 위치
+            left: -5, // 가로로 꽉 채우기 위해 여백 없음
+            right: -5,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xFFFDFDFD), // 배경색
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16), // 테두리 끝 둥글게
+                  topRight: Radius.circular(16), // 테두리 끝 둥글게
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5), // 그림자 색상
+                    offset: Offset(0, 4), // 그림자 위치 (x, y)
+                    blurRadius:12, // 그림자 흐림 효과
+                  ),
+                ],
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.5), // 테두리 색상
+                  width: 2, // 테두리 두께
+                ),
+              ),
+              height: 580, // 외부 박스 높이 (임의로 설정)
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 32.0), //전체적 테두리 여백
+            child: Column( //Colum 위젯들을 수직으로 정렬
+              crossAxisAlignment: CrossAxisAlignment.stretch, //crossAxisAlignment.stretch: 자식 위젯들이 가로 방향으로 꽉 차도록 설정
+              children: [
+                Row( //로고 아이콘과 텍스트를 가로로 배치
+                  children: [
+                    Icon(Icons.local_pharmacy, size: 24, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text(
+                      'MediTag',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '시각장애인을 위한 NFC 기반\nAI 대화형 챗봇 복약 관리 서비스',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 12), // 텍스트와 이미지 간격
+                    Align(
+                      alignment: Alignment.centerRight, // 이미지를 오른쪽 정렬
+                      child: Image.asset(
+                        'assets/images/pill_hand.png', // 이미지 경로
+                        width: 111,
+                        height: 97,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildCard(
+                        title: '전맹이에요',
+                        description:
+                        '음성을 통해 처방 받은 약의 정보와\n복용 방법, 복용 빈도를 제공 받을 수 있어요!',
+                        color: Color(0xFFFDFDFD),
+                        borderColor: Color(0xFF4660DA),
+                      ),
+                      SizedBox(height: 16),
+                      _buildCard(
+                        title: '저시력자에요',
+                        description:
+                        '시각장애인을 위해 처방 받은 약의 정보와\n복용 방법을 등록해주세요!',
+                        color: Color(0xFFFDFDFD),
+                        borderColor: Color(0xFFECECEC),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  /*
+  _buildCard(
+  title: '전맹이에요',
+  description: '음성을 통해 처방 받은 약의 정보와\n복용 방법, 복용 빈도를 제공 받을 수 있어요!',
+  color: Color(0xFFFDFDFD),
+  borderColor: Color(0xFF4660DA),
+),
+   */
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+  Widget _buildCard({
+    required String title,
+    required String description,
+    required Color color,
+    required Color borderColor, //borderColor: 카드의 테두리 색상
+  }) {
+    return Container(
+      constraints: BoxConstraints(
+        minHeight: 180, // 카드 최소 높이 고정 높이 대신 최소 높이를 설정하고, 내용에 따라 크기를 동적으로 조정할 수도 있음
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor, width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title, //카드의 제목
+                    style: TextStyle(
+                      fontSize: 24, //전맹이에요 폰트 사이즈
+                      fontWeight: FontWeight.bold,
+                      color: borderColor == Colors.transparent //텍스트 색상은 borderColor에 따라 다름 borderColor: 카드의 테두리 색상
+                          ? Colors.black
+                          : Color(0xFF547EE8),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    description, //카드의 설명 텍스트
+                    style: TextStyle(
+                        fontSize: 16, //밑에 설명 글자 사이즈
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black),
+                  ),
+                ],
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Icon(Icons.arrow_forward, color: Colors.black),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
