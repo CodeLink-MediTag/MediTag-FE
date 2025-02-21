@@ -30,7 +30,6 @@ class _Title extends StatelessWidget{
     Expanded(
       flex: 4,
       child: Container(
-        // color: Colors.green[100],
         height: 100,
         child: Column(
           children: [
@@ -58,7 +57,6 @@ class _Input extends StatelessWidget{
     Expanded(
       flex: 6,
       child: Container(
-        // color: Colors.blue[100],
         height: 100,
         child: Column(
           children: [
