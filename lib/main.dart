@@ -82,12 +82,12 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        fixedSize: Size(128, 54), // 크기 고정
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        backgroundColor: Color(0xFF547EE8),
+                        fixedSize: Size(128, 54),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: () {
-                        _confirmMedication(key); // "복용 완료!"로 변경
+                        _confirmMedication(key);
                         Navigator.pop(context);
                       },
                       child: Text(
@@ -99,12 +99,12 @@ class _MainScreenState extends State<MainScreen> {
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.grey.shade300,
                         fixedSize: Size(128, 54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      onPressed: () => Navigator.pop(context), // '아니요' 누르면 그대로 유지
+                      onPressed: () => Navigator.pop(context),
                       child: Text(
                         "아니요",
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black), // 검정색 폰트
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                     ),
                   ],
@@ -121,14 +121,15 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF547EE8),
+        toolbarHeight: 80.0,
         title: Text(
           '000의 복약알림',
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
         leading: Icon(Icons.arrow_back, color: Colors.white),
-        actions: [SizedBox(width: 16), Icon(Icons.settings, color: Colors.white)],
+        actions: [SizedBox(width: 20), Icon(Icons.settings, color: Colors.white)],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -141,7 +142,7 @@ class _MainScreenState extends State<MainScreen> {
             SizedBox(height: 40),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: Color(0xFF547EE8),
                 minimumSize: Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
@@ -158,72 +159,69 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildMedicationCard(String title, String subtitle, List<String> timeKeys) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.blue, width: 2),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16), // 상자 크기 통일
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Color(0xFF547EE8), width: 2),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
                   color: Colors.grey.shade300,
-                  child: Icon(Icons.image, color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                SizedBox(width: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Icon(Icons.arrow_forward, color: Colors.black),
-              ],
+                child: Icon(Icons.image, color: Colors.grey, size: 35),
+              ),
+              SizedBox(width: 15),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 5),
+                  Text(subtitle, style: TextStyle(fontSize: 18, color: Colors.grey)),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 15),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 8), // 여백을 추가하여 버튼들이 잘리지 않게 함
+              child: Row(
+                children: timeKeys.map((key) => _buildTimeButton(key)).toList(),
+              ),
             ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: timeKeys.map((key) => _buildTimeButton(key)).toList(),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTimeButton(String key) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0), // 간격을 조금 더 넓게
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: medicationTimes[key] == '복용 완료!' ? Color(0xFF89B8FF) : Colors.white,
-          minimumSize: Size(86, 50),
+          backgroundColor: medicationTimes[key] == '복용 완료!' ? Color(0xFFA3BCF1) : Colors.white,
+          minimumSize: Size(110, 55), // 버튼 크기 통일 (너비 늘리기)
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         onPressed: () {
           if (medicationTimes[key] == '복용 완료!') {
-            toggleTime(key); // 팝업 없이 원래 시간으로 복구
+            toggleTime(key);
           } else {
-            _showMedicationDialog(key); // 팝업 띄우기
+            _showMedicationDialog(key);
           }
         },
         child: Text(
