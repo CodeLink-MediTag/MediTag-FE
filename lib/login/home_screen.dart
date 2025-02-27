@@ -8,14 +8,20 @@ class HomeScreen extends StatelessWidget{
   Widget build(BuildContext context) {
     return
     Padding(
-      padding: EdgeInsets.only(left: 13, right: 13),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _Title(),
-          _Input()
-        ],
-      ),
+      // padding: EdgeInsets.only(left: 13, right: 13),
+      padding: const EdgeInsets.all(16.0),
+      child:
+      Container(
+        // color: Colors.red,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Title(),
+            _Input()
+          ],
+        ),
+      )
+
     )
     ;
   }
