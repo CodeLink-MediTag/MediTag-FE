@@ -20,12 +20,11 @@ class MedicineScheduleScreen extends StatefulWidget {
 }
 
 class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
-  String? selectedTime = "아침"; // 복용 주기 선택
-  String? selectedPeriod = "3일"; // 복용 기간 선택
+  String? selectedTime = "아침";
+  String? selectedPeriod = "3일";
   TextEditingController customDaysController = TextEditingController();
   DateTime selectedDate = DateTime.now();
 
-  // 날짜 선택 함수
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -46,14 +45,11 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // AppBar
           Container(
-            height: 80, // 앱바 높이
             color: Color(0xFF547EE8),
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
-              crossAxisAlignment: CrossAxisAlignment.center, // 아이콘과 텍스트 수직 중앙 정렬
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
@@ -71,11 +67,10 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 40), // 오른쪽 여백
+                SizedBox(width: 40),
               ],
             ),
           ),
-
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -87,12 +82,9 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 20),
-
-                  // 복용 주기
                   Text("복용 주기", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
                     children: ["아침", "점심", "저녁"].map((time) {
                       return Row(
                         children: [
@@ -106,14 +98,12 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                             },
                           ),
                           Text(time, style: TextStyle(fontSize: 14)),
-                          SizedBox(width: 10), // 요소 간격 추가
+                          SizedBox(width: 10),
                         ],
                       );
                     }).toList(),
                   ),
                   SizedBox(height: 20),
-
-                  // 복용 시작 날짜
                   Text("복용 시작 날짜", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   GestureDetector(
@@ -134,15 +124,12 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                     ),
                   ),
                   SizedBox(height: 20),
-
-                  // 복용 기간
                   Text("복용 기간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
-
                   Column(
                     children: ["3일", "5일", "1개월", "1년", "매일"].map((period) {
                       return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 5), // 간격 추가
+                        padding: EdgeInsets.symmetric(vertical: 5),
                         child: Container(
                           width: 358,
                           height: 53,
@@ -160,67 +147,17 @@ class _MedicineScheduleScreenState extends State<MedicineScheduleScreen> {
                               });
                             },
                             activeColor: Colors.blue,
-                            controlAffinity: ListTileControlAffinity.trailing, // 동그라미 오른쪽 정렬
+                            controlAffinity: ListTileControlAffinity.trailing,
                           ),
                         ),
                       );
                     }).toList(),
-                  ),
-
-                  // 기타 기간 입력 (길이 3일과 동일하게)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5), // 간격 추가
-                    child: Container(
-                      width: 358,
-                      height: 53,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 16),
-                            child: Row(
-                              children: [
-                                Text("기타: ", style: TextStyle(fontSize: 20)),
-                                SizedBox(
-                                  width: 70,
-                                  child: TextField(
-                                    controller: customDaysController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      hintText: "1~9999",
-                                      border: InputBorder.none,
-                                    ),
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ),
-                                Text(" 일", style: TextStyle(fontSize: 20)),
-                              ],
-                            ),
-                          ),
-                          Radio(
-                            value: "기타",
-                            groupValue: selectedPeriod,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedPeriod = "기타";
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                   SizedBox(height: 40),
                 ],
               ),
             ),
           ),
-
-          // 다음 버튼
           Padding(
             padding: EdgeInsets.only(bottom: 20),
             child: SizedBox(
