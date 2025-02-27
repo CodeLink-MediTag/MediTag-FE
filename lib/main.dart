@@ -67,15 +67,9 @@ class _MainScreenState extends State<MainScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  "처방약",
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
+                Text("처방약", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
                 SizedBox(height: 10),
-                Text(
-                  "$currentTime에 약을 드셨나요?",
-                  style: TextStyle(fontSize: 19, color: Colors.grey),
-                ),
+                Text("$currentTime에 약을 드셨나요?", style: TextStyle(fontSize: 19, color: Colors.grey)),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -90,10 +84,7 @@ class _MainScreenState extends State<MainScreen> {
                         _confirmMedication(key);
                         Navigator.pop(context);
                       },
-                      child: Text(
-                        "네",
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                      child: Text("네", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
@@ -102,10 +93,7 @@ class _MainScreenState extends State<MainScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        "아니요",
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black),
-                      ),
+                      child: Text("아니요", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black)),
                     ),
                   ],
                 ),
@@ -120,40 +108,50 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF547EE8),
-        toolbarHeight: 80.0,
-        title: Text(
-          '000의 복약알림',
-          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        centerTitle: true,
-        leading: Icon(Icons.arrow_back, color: Colors.white),
-        actions: [SizedBox(width: 20), Icon(Icons.settings, color: Colors.white)],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            _buildMedicationCard('처방약', '긴 상자', ['처방약_1', '처방약_2', '처방약_3']),
-            SizedBox(height: 40),
-            _buildMedicationCard('비타민', '원형 긴 통', ['비타민_1', '비타민_2']),
-            SizedBox(height: 40),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF547EE8),
-                minimumSize: Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              onPressed: () {},
-              child: Text(
-                '알림 받을 약 추가',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+      body: Column(
+        children: [
+          // 앱바 대체용 Container
+          Container(
+            color: Color(0xFF547EE8),
+            padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.arrow_back, color: Colors.white),
+                Text(
+                  '000의 복약알림',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                Icon(Icons.settings, color: Colors.white),
+              ],
+            ),
+          ),
+
+          // 본문
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  SizedBox(height: 20),
+                  _buildMedicationCard('처방약', '긴 상자', ['처방약_1', '처방약_2', '처방약_3']),
+                  SizedBox(height: 40),
+                  _buildMedicationCard('비타민', '원형 긴 통', ['비타민_1', '비타민_2']),
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF547EE8),
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    onPressed: () {},
+                    child: Text('알림 받을 약 추가', style: TextStyle(fontSize: 18, color: Colors.white)),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -161,7 +159,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildMedicationCard(String title, String subtitle, List<String> timeKeys) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16), // 상자 크기 통일
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -197,7 +195,7 @@ class _MainScreenState extends State<MainScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 8), // 여백을 추가하여 버튼들이 잘리지 않게 함
+              padding: EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: timeKeys.map((key) => _buildTimeButton(key)).toList(),
               ),
@@ -210,11 +208,11 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildTimeButton(String key) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0), // 간격을 조금 더 넓게
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: medicationTimes[key] == '복용 완료!' ? Color(0xFFA3BCF1) : Colors.white,
-          minimumSize: Size(110, 55), // 버튼 크기 통일 (너비 늘리기)
+          minimumSize: Size(110, 55),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         onPressed: () {
