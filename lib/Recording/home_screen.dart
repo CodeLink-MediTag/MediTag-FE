@@ -15,10 +15,13 @@ class HomeScreen extends StatelessWidget{
         children: [
           _TopBar(),
 
-          Padding(
-              padding: EdgeInsets.only(left: 18, right: 18),
-              child: _MainView()
+          Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: _MainView()
+              )
           )
+
         ],
       );
   }
@@ -30,44 +33,78 @@ class _TopBar extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return
+      // Container(
+      //   padding: EdgeInsets.only(top: 50),
+      //   color: Colors.blueAccent,
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: [
+      //       Container(
+      //         padding: EdgeInsets.only(left: 15),
+      //         width: 30,
+      //         child: Icon(
+      //           Icons.arrow_back,
+      //           color: Colors.white,
+      //         ),
+      //       ),
+      //       Container(
+      //           height: 70,
+      //           width: 200,
+      //           child: Center(
+      //             child: Text(
+      //                 style: TextStyle(
+      //                     fontSize: 25,
+      //                     fontWeight: FontWeight.bold,
+      //                     color: Colors.white
+      //                 ),
+      //                 '주의사항 녹음'
+      //             ),
+      //           )
+      //
+      //       ),
+      //       Container(
+      //         padding: EdgeInsets.only(right: 12),
+      //         width: 30,
+      //         height: 20,
+      //         child: Icon(
+      //           Icons.home,
+      //           color: Colors.white,
+      //         ),
+      //       )
+      //     ],
+      //   ),
+      // )
       Container(
-        padding: EdgeInsets.only(top: 50),
-        color: Colors.blueAccent,
+        padding: EdgeInsets.only(top: 37, bottom: 12), // 상단바 위쪽 높이 증가
+        color: Color(0xFF547EE8), //상단바 컬러
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              padding: EdgeInsets.only(left: 15),
-              width: 30,
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-              ),
+            IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {},
             ),
+
             Container(
                 height: 70,
                 width: 200,
                 child: Center(
                   child: Text(
                       style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 26,
                           fontWeight: FontWeight.bold,
                           color: Colors.white
                       ),
-                      '주의사항 녹음'
+                      '주의사항 등록'
                   ),
                 )
 
             ),
-            Container(
-              padding: EdgeInsets.only(right: 12),
-              width: 30,
-              height: 20,
-              child: Icon(
-                Icons.home,
-                color: Colors.white,
-              ),
-            )
+            IconButton(
+              icon: Icon(Icons.home, color: Colors.white),
+              onPressed: () {},
+            ),
+
           ],
         ),
       )
@@ -83,27 +120,26 @@ class _MainView extends StatelessWidget{
   Widget build(BuildContext context) {
     return
       Container(
-        height: 650,
         child: Column(
           children: [
 
-            SizedBox(height: 18,),
 
-            Container(
-              height: 500,
-              width: double.infinity,
-              child: RecordingStart(),
+            Expanded(
+                child: Container(
+                  width: double.infinity,
+                  child: Recording(),
+                ),
             ),
 
-            SizedBox(height: 60,),
+            SizedBox(height: 20,),
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent[200],
+                  backgroundColor: Color(0xFF547EE8),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                 ),
-                minimumSize: Size(500, 55),
+                minimumSize: Size(double.infinity, 50),
                 textStyle: TextStyle(
                     fontSize: 20
                 ),
