@@ -23,9 +23,8 @@ class MedicineRegistrationScreen extends StatelessWidget {
         children: [
           // AppBar
           Container(
-            height: 80, // 앱바 높이 설정
             color: Color(0xFF547EE8),
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
               crossAxisAlignment: CrossAxisAlignment.center, // 아이콘과 텍스트 수직 중앙 정렬
@@ -41,7 +40,7 @@ class MedicineRegistrationScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.white, // 텍스트 색상 흰색
                       ),
                     ),
                   ),
