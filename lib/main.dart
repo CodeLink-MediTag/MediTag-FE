@@ -68,9 +68,8 @@ class AlarmRegistrationScreenState extends State<AlarmRegistrationScreen> {
         children: [
           // AppBar
           Container(
-            height: 80,
             color: Color(0xFF547EE8),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
               children: [
                 IconButton(
