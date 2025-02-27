@@ -62,7 +62,7 @@ class RecordingStart extends StatelessWidget{
                       height: 70,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.blueAccent
+                        color: Color(0xFF547EE8), //상단바 컬러
                       ),
                       child: Center(
                         child: Text(
@@ -81,7 +81,8 @@ class RecordingStart extends StatelessWidget{
                       height: 90,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.blueAccent[200]
+                        color: Color(0xFF547EE8), //상단바 컬러
+
                       ),
                       child: Icon(
                         Icons.pause,
@@ -94,7 +95,8 @@ class RecordingStart extends StatelessWidget{
                       height: 70,
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.blueAccent
+                        color: Color(0xFF547EE8), //상단바 컬러
+
                       ),
                       child: Icon(
                         Icons.stop,

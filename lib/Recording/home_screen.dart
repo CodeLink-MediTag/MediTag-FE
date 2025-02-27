@@ -127,7 +127,8 @@ class _MainView extends StatelessWidget{
             Expanded(
                 child: Container(
                   width: double.infinity,
-                  child: Recording(),
+                  // child: Recording(),
+                  child: RecordingStart(),
                 ),
             ),
 
