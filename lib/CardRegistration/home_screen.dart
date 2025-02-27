@@ -39,14 +39,11 @@ class _TopBar extends StatelessWidget{
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            // padding: EdgeInsets.only(left: 15),
-            width: 30,
-            child: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            ),
+          IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {},
           ),
+
           Container(
             height: 70,
             width: 200,
@@ -62,10 +59,11 @@ class _TopBar extends StatelessWidget{
             )
 
           ),
-          Container(
-            width: 30,
-            height: 20,
-          )
+          IconButton(
+            icon: Icon(Icons.home, color: Colors.white),
+            onPressed: () {},
+          ),
+
         ],
       ),
     )
