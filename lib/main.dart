@@ -34,7 +34,7 @@ class _SettingsPageState extends State<Settings> {
         children: [
           Container(
             color: Color(0xFF547EE8),
-            padding: EdgeInsets.only(top: 32, bottom: 16), // 상단바 위쪽 높이 증가
+            padding: EdgeInsets.only(top: 37, bottom: 12), // 상단바 위쪽 높이 증가
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -129,7 +129,10 @@ class _SettingsPageState extends State<Settings> {
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF547EE8),
-                        minimumSize: Size(double.infinity, 50),
+                        minimumSize: Size(358, 48), // 가로 358, 세로 48로 설정
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                       child: Text(
                         '로그아웃',
