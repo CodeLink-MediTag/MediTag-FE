@@ -57,7 +57,7 @@ class _ChatBotPageState extends State<ChatBot> {
               // 상단 바
               Container(
                 color: Color(0xFF547EE8),
-                padding: EdgeInsets.only(top: 32, bottom: 16),
+                padding: EdgeInsets.only(top: 37, bottom: 12),
                 child: Row(
                   children: [
                     IconButton(
