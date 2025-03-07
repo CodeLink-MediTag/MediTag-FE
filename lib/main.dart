@@ -36,7 +36,7 @@ class _MedicineCheckPageState extends State<MedicineCheck> {
         children: [
           Container(
             color: Color(0xFF547EE8), //상단바 컬러
-            padding: EdgeInsets.only(top: 32, bottom: 16), // 상단바 위쪽 높이 증가
+            padding: EdgeInsets.only(top: 37, bottom: 12), // 상단바 위쪽 높이 증가
             child: Column(
               children: [
                 Row(
@@ -109,7 +109,10 @@ class _MedicineCheckPageState extends State<MedicineCheck> {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF547EE8),
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: Size(358, 48), // 가로 358, 세로 48로 설정
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: Text(
                       '복용 기록보기',
@@ -121,7 +124,10 @@ class _MedicineCheckPageState extends State<MedicineCheck> {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF547EE8),
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: Size(358, 48), // 가로 358, 세로 48로 설정
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: Text(
                       '챗봇에게 질문하기',
