@@ -30,7 +30,7 @@ class _AlertSoundPageState extends State<AlertSound> {
         children: [
           Container(
             color: Color(0xFF547EE8),
-            padding: EdgeInsets.only(top: 32, bottom: 16), // 상단바 위쪽 높이 증가
+            padding: EdgeInsets.only(top: 37, bottom: 12), // 상단바 위쪽 높이 증가
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -91,4 +91,3 @@ class _AlertSoundPageState extends State<AlertSound> {
     );
   }
 }
-//ㅎㅎ
