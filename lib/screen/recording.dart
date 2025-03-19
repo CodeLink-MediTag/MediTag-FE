@@ -15,7 +15,7 @@ class RecordingScreen extends StatelessWidget{
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.white
-          ),sssssssssssssssssssssss
+          ),
         ),
       ),
       child: Scaffold(
