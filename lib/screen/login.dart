@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/screen/main.dart';
 import 'package:untitled9/screen/account.dart';
 
@@ -115,7 +119,78 @@ class _Title extends StatelessWidget{
 }
 
 class _Input extends StatelessWidget{
+  final TextEditingController usernameController = TextEditingController(text: 'admin');
+  final TextEditingController passwordController = TextEditingController(text: 'password');
+  String responseText = '';
+
+
   _Input({Key? key}): super(key: key);
+
+  Future<void> loginUser(BuildContext context) async {
+    var url = Uri.parse('http://192.168.219.104:8080/login');  // Node.js 서버 주소
+
+    var headers = {"Content-Type": "application/json"};
+    var body = jsonEncode({
+      "username": usernameController.text,
+      "password": passwordController.text,
+    });
+
+    try {
+      var response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+
+        // 서버에서 받은 토큰
+        var data = jsonDecode(response.body);
+        String token = data['token'];
+
+        // SharedPreferences에 토큰 저장
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', token);
+
+        responseText = '로그인 성공! 토큰: $token';
+
+        await showPopupAndWait(context);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+
+      } else {
+        responseText = '로그인 실패! ${response.statusCode}';
+      }
+    } catch (e, stackTrace) {
+      responseText = '에러 발생: $e';
+
+    }
+
+
+  }
+
+  Future<void> showPopupAndWait(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('알림'),
+          content: Text('토큰이 발급되었습니다. \n발급된 토큰 : $responseText'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 확인 누르면 dialog 닫히고 함수가 다시 이어짐
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // 이 아래 코드는 팝업이 닫힌 후 실행됨
+    print('사용자가 확인을 눌렀습니다!');
+    // 여기에 다음 로직을 이어서 작성하면 됩니다
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +213,7 @@ class _Input extends StatelessWidget{
 
               // 아이디 입력칸
               TextField(
+                controller: usernameController,
                 decoration: InputDecoration(
                     labelText: 'ID',
                     suffixIcon: Icon(
@@ -160,8 +236,9 @@ class _Input extends StatelessWidget{
 
               // 비밀번호 입력칸
               TextField(
+                controller: passwordController,
                 decoration: InputDecoration(
-                    labelText: 'ID',
+                    labelText: 'PASSWORD',
                     suffixIcon: Icon(
                       Icons.lock,
                       color: Colors.grey[500],
@@ -174,10 +251,11 @@ class _Input extends StatelessWidget{
               // 로그인 버튼
               ElevatedButton(
                   onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MainScreen()),
-                    );
+                    loginUser(context);
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => MainScreen()),
+                    // );
                   },
                   child: Text(
                     '로그인',
