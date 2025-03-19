@@ -76,7 +76,7 @@ class _TopBar extends StatelessWidget{
             ),
 
             Container(
-                height: 70,
+                // height: 70,
                 width: 200,
                 child: Center(
                   child: Text(
