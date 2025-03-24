@@ -4,10 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/screen/main.dart';
-import 'package:untitled9/screen/account.dart';
 
 
-class Login extends StatelessWidget {
+class Login extends StatelessWidget{
+
   const Login({super.key});
 
   @override
@@ -181,6 +181,7 @@ class _Input extends StatelessWidget{
 
   }
 
+  // 팝업 알림창
   Future<void> showPopupAndWait(BuildContext context) async {
     await showDialog(
       context: context,

@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:untitled9/screen/login.dart';
 
 
-class SignupScreen extends StatefulWidget {
-  @override
-  _SignupState createState() => _SignupState();
-}
-
-class _SignupState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,10 +20,10 @@ class _SignupState extends State<SignupScreen> {
               ),
             ),
             SizedBox(height: 30),
-            _buildInputField('아이디', '아이디 입력'),
-            _buildInputField('이름', '이름 입력'),
-            _buildInputField('전화번호', '010-0000-0000'),
-            _buildInputField('비밀번호', '비밀번호', isPassword: true),
+            _buildInputField('아이디', '아이디 입력', usernameController),
+            _buildInputField('이름', '이름 입력', nameController),
+            _buildInputField('전화번호', '010-0000-0000', phoneController),
+            _buildInputField('비밀번호', '비밀번호', passwordController, isPassword: true),
             SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
@@ -72,6 +65,7 @@ class _SignupState extends State<SignupScreen> {
           ),
           SizedBox(height: 5),
           TextField(
+            controller: controller,
             obscureText: isPassword,
             decoration: InputDecoration(
               hintText: hint,
