@@ -119,15 +119,19 @@ class _Title extends StatelessWidget{
 }
 
 class _Input extends StatelessWidget{
-  final TextEditingController usernameController = TextEditingController(text: 'admin');
-  final TextEditingController passwordController = TextEditingController(text: 'password');
+  final TextEditingController usernameController = TextEditingController(text: 'test@gmail.com');
+  final TextEditingController passwordController = TextEditingController(text: 'test12345');
   String responseText = '';
 
 
   _Input({Key? key}): super(key: key);
 
+  void test () {
+    print("Hello World");
+  }
+
   Future<void> loginUser(BuildContext context) async {
-    var url = Uri.parse('http://192.168.219.104:8080/login');  // Node.js 서버 주소
+    var url = Uri.parse('http://192.168.219.104:8080/api/auth/login');
 
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
@@ -141,20 +145,30 @@ class _Input extends StatelessWidget{
 
         // 서버에서 받은 토큰
         var data = jsonDecode(response.body);
-        String token = data['token'];
+        String token = data['accessToken'];
 
-        // SharedPreferences에 토큰 저장
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', token);
+
 
         responseText = '로그인 성공! 토큰: $token';
 
         await showPopupAndWait(context);
 
+
+
+        // SharedPreferences에 토큰 저장
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', token);
+
+
+
+
+
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
+
+
 
       } else {
         responseText = '로그인 실패! ${response.statusCode}';
@@ -252,10 +266,7 @@ class _Input extends StatelessWidget{
               ElevatedButton(
                   onPressed: (){
                     loginUser(context);
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => MainScreen()),
-                    // );
+                    // test();
                   },
                   child: Text(
                     '로그인',
