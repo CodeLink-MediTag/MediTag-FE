@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:untitled9/screen/main.dart';
+import 'package:untitled9/screen/account.dart';
 
 
-class Login extends StatelessWidget{
-
+class Login extends StatelessWidget {
   const Login({super.key});
 
   @override
@@ -188,7 +188,12 @@ class _Input extends StatelessWidget{
 
               // 회원가입 버튼
               ElevatedButton(
-                  onPressed: (){},
+                  onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignupScreen()),
+                    );
+                  },
                   child: Text(
                     '회원가입',
                     // style: TextStyle(color: Colors.white),

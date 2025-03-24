@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:untitled9/screen/renew.dart';
+import 'package:untitled9/screen/MedicationDetail.dart';
+import 'package:untitled9/screen/calendar.dart';
 
 
 class Eatmed1 extends StatelessWidget {
@@ -119,11 +122,23 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 ),
                 Text(
-                  '000의 복약알림',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                  '메인 화면',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Colors.white,
+                  ),
                 ),
-                Icon(Icons.settings, color: Colors.white),
-              ],
+                IconButton(
+                icon: Icon(Icons.calendar_today, color: Colors.white),
+                  onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CalendarScreen()),
+                    );
+                  },
+                )
+              ]
             ),
           ),
 
@@ -144,7 +159,12 @@ class _MainScreenState extends State<MainScreen> {
                       minimumSize: Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => RenewScreen()),
+                      );
+                    },
                     child: Text('알림 받을 약 추가', style: TextStyle(fontSize: 18, color: Colors.white)),
                   ),
                 ],
@@ -185,6 +205,15 @@ class _MainScreenState extends State<MainScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward_ios, size: 20, color: Colors.grey),
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MedicationDetail()),
+                      );
+                    },
+                  ),
                   SizedBox(height: 5),
                   Text(subtitle, style: TextStyle(fontSize: 18, color: Colors.grey)),
                 ],
