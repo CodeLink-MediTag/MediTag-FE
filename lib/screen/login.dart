@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/screen/main.dart';
-
+import 'package:untitled9/screen/account.dart';
 
 class Login extends StatelessWidget{
 
@@ -131,7 +131,7 @@ class _Input extends StatelessWidget{
   }
 
   Future<void> loginUser(BuildContext context) async {
-    var url = Uri.parse('http://172.16.109.29:8080/api/auth/login');
+    var url = Uri.parse('http://localhost:8080/api/auth/login');
 
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
