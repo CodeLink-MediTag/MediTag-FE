@@ -131,7 +131,7 @@ class _Input extends StatelessWidget{
   }
 
   Future<void> loginUser(BuildContext context) async {
-    var url = Uri.parse('http://192.168.219.104:8080/api/auth/login');
+    var url = Uri.parse('http://172.16.109.29:8080/api/auth/login');
 
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
@@ -171,10 +171,12 @@ class _Input extends StatelessWidget{
 
 
       } else {
-        responseText = '로그인 실패! ${response.statusCode}';
+
+        print(body);
       }
     } catch (e, stackTrace) {
-      responseText = '에러 발생: $e';
+
+      print(e);
 
     }
 
