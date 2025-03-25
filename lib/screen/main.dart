@@ -14,34 +14,7 @@ class MainScreen extends StatelessWidget {
   String tokenValue = '';
 
 
-  Future<void> showPopupAndWait(BuildContext context) async {
 
-    //토큰 가져오는 로직
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    tokenValue = prefs.getString('token')?? '';
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('알림'),
-          content: Text('현재 토큰: ${tokenValue}'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 확인 누르면 dialog 닫히고 함수가 다시 이어짐
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
-
-    // 이 아래 코드는 팝업이 닫힌 후 실행됨
-    print('사용자가 확인을 눌렀습니다!');
-    // 여기에 다음 로직을 이어서 작성하면 됩니다
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,14 +57,6 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 4,),
-              // 토큰 확인 버튼 (임시)
-              ElevatedButton(
-                onPressed: (){
-                  showPopupAndWait(context);
-                },
-                child: Text("토큰 확인")
-              ),
 
               // 메인 콘텐츠
               Expanded(

@@ -149,9 +149,9 @@ class _Input extends StatelessWidget{
 
 
 
-        responseText = '로그인 성공! 토큰: $token';
+        responseText = data.toString();
 
-        await showPopupAndWait(context);
+        await showPopupAndWait(context, "로그인 성공");
 
 
 
@@ -171,12 +171,14 @@ class _Input extends StatelessWidget{
 
 
       } else {
+        var data = jsonDecode(response.body);
+        responseText = data.toString();
+        await showPopupAndWait(context, "로그인 실패");
 
-        print(body);
       }
     } catch (e, stackTrace) {
 
-      print(e);
+      await showPopupAndWait(context, "에러발생 $e");
 
     }
 
@@ -184,13 +186,13 @@ class _Input extends StatelessWidget{
   }
 
   // 팝업 알림창
-  Future<void> showPopupAndWait(BuildContext context) async {
+  Future<void> showPopupAndWait(BuildContext context, String title) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('알림'),
-          content: Text('토큰이 발급되었습니다. \n발급된 토큰 : $responseText'),
+          title: Text(title),
+          content: Text('서버 반환 내용:\n$responseText'),
           actions: [
             TextButton(
               onPressed: () {
