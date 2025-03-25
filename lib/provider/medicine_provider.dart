@@ -10,6 +10,7 @@ class MedicineProvider extends ChangeNotifier {
   int _frequency = 1;
   List<String> _dosageTimes = ['아침'];
   List<String> _alarmTimes = [];
+  bool _prescribed = false;
   File? _imageFile;
 
   // Getters
@@ -20,6 +21,7 @@ class MedicineProvider extends ChangeNotifier {
   int get frequency => _frequency;
   List<String> get dosageTimes => _dosageTimes;
   List<String> get alarmTimes => _alarmTimes;
+  bool get prescribed => _prescribed;
   File? get imageFile => _imageFile;
 
   // Setters
@@ -55,6 +57,11 @@ class MedicineProvider extends ChangeNotifier {
 
   void setAlarmTimes(List<String> alarmTimes) {
     _alarmTimes = alarmTimes;
+    notifyListeners();
+  }
+
+  void setPrescribed(bool value) {
+    _prescribed = value;
     notifyListeners();
   }
 
