@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:untitled9/screen/renewday.dart';
-
+import 'package:untitled9/provider/medicine_provider.dart';
 
 class RenewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return
-      Eatmed1();
+    return Eatmed1();
   }
 }
 
@@ -16,8 +15,31 @@ class Eatmed1 extends StatefulWidget {
 }
 
 class _Eatmed1State extends State<Eatmed1> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _characteristicController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // 기존 데이터가 있으면 컨트롤러에 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<MedicineProvider>(context, listen: false);
+      _nameController.text = provider.name;
+      _characteristicController.text = provider.characteristic;
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _characteristicController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final medicineProvider = Provider.of<MedicineProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -27,13 +49,13 @@ class _Eatmed1State extends State<Eatmed1> {
             color: Color(0xFF547EE8),
             padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
-              crossAxisAlignment: CrossAxisAlignment.center, // 아이콘과 텍스트 수직 중앙 정렬
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 IconButton(
                   icon: Icon(Icons.close, color: Colors.white, size: 30),
                   onPressed: (){
-                    Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+                    Navigator.pop(context);
                   },
                 ),
                 Expanded(
@@ -43,12 +65,12 @@ class _Eatmed1State extends State<Eatmed1> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // 텍스트 색상 흰색
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 40), // 오른쪽 여백
+                SizedBox(width: 40),
               ],
             ),
           ),
@@ -60,12 +82,12 @@ class _Eatmed1State extends State<Eatmed1> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 30), // 여백 조정
+                  SizedBox(height: 30),
                   Text(
                     "약의 이름과 특징을 입력해 주세요!",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 30), // 여백 추가
+                  SizedBox(height: 30),
 
                   // 이름 등록
                   Text("이름 등록", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -74,6 +96,8 @@ class _Eatmed1State extends State<Eatmed1> {
                     width: 358,
                     height: 48,
                     child: TextField(
+                      controller: _nameController,
+                      onChanged: (value) => medicineProvider.setName(value),
                       decoration: InputDecoration(
                         hintText: "이름을 지어주세요! 예) 처방약, 비타민B",
                         hintStyle: TextStyle(color: Colors.grey),
@@ -85,6 +109,7 @@ class _Eatmed1State extends State<Eatmed1> {
                       ),
                     ),
                   ),
+
                   SizedBox(height: 20),
 
                   // 특징 등록
@@ -94,6 +119,8 @@ class _Eatmed1State extends State<Eatmed1> {
                     width: 358,
                     height: 48,
                     child: TextField(
+                      controller: _characteristicController,
+                      onChanged: (value) => medicineProvider.setCharacteristic(value),
                       decoration: InputDecoration(
                         hintText: "특징을 등록해 주세요! 예) 동그란 통, 사각 통",
                         hintStyle: TextStyle(color: Colors.grey),
@@ -106,7 +133,7 @@ class _Eatmed1State extends State<Eatmed1> {
                     ),
                   ),
 
-                  Spacer(), // 버튼을 아래로 밀어줌
+                  Spacer(),
 
                   // 버튼들
                   Column(
@@ -119,7 +146,10 @@ class _Eatmed1State extends State<Eatmed1> {
                             backgroundColor: Color(0xFF547EE8),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            // 처방약 등록 로직
+                            medicineProvider.setPrescribed(true);
+                          },
                           child: Text(
                             "처방약 등록",
                             style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
@@ -136,6 +166,7 @@ class _Eatmed1State extends State<Eatmed1> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                           onPressed: (){
+                            // 다음 화면으로 이동
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => RenewdayScreen()),
@@ -147,7 +178,7 @@ class _Eatmed1State extends State<Eatmed1> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 20), // 마지막 여백 추가
+                      SizedBox(height: 20),
                     ],
                   ),
                 ],
