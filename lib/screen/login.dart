@@ -292,6 +292,13 @@ class _Input extends StatelessWidget{
                     '회원가입',
                     // style: TextStyle(color: Colors.white),
                   )
+              ),
+
+              Container(
+                child: GestureDetector(
+                  onTap: (){},  // 이미지를 클릭했을 때 실행할 메서드
+                  child: Image.asset('assets/your_image.png'),  // 여기에 사용할 이미지 경로를 넣습니다
+                ),
               )
 
 
