@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/screen/main.dart';
 import 'package:untitled9/screen/account.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Login extends StatelessWidget{
 
@@ -185,6 +186,16 @@ class _Input extends StatelessWidget{
 
   }
 
+  // 브라우저에서 url 열기
+  Future<void> _launchURL(String siteName) async {
+    final String loginUrl = "http://localhost:8080/oauth2/authorization/$siteName";
+
+    final Uri url = Uri.parse(loginUrl);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $loginUrl';
+    }
+  }
+
   // 팝업 알림창
   Future<void> showPopupAndWait(BuildContext context, String title) async {
     await showDialog(
@@ -294,12 +305,38 @@ class _Input extends StatelessWidget{
                   )
               ),
 
-              Container(
-                child: GestureDetector(
-                  onTap: (){},  // 이미지를 클릭했을 때 실행할 메서드
-                  child: Image.asset('assets/your_image.png'),  // 여기에 사용할 이미지 경로를 넣습니다
+              SizedBox(height: 20,),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow
                 ),
-              )
+                  onPressed: (){
+                    _launchURL('kakao');
+                  },
+                  child: Text(
+                    style: TextStyle(
+                      color: Colors.brown
+                    ),
+                    'kakao 로그인',
+                  )
+              ),
+              SizedBox(height: 20,),
+
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green
+                  ),
+                  onPressed: (){
+                    _launchURL('kakao');
+                  },
+                  child: Text(
+                    style: TextStyle(
+                        color: Colors.white
+                    ),
+                    'NAVER 로그인',
+                  )
+              ),
 
 
             ],
