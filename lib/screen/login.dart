@@ -99,7 +99,7 @@ class _Title extends StatelessWidget{
   Widget build(BuildContext context) {
     return
       Expanded(
-          flex: 4,
+          flex: 2,
           child: Container(
             height: 100,
             child: Column(
@@ -132,7 +132,7 @@ class _Input extends StatelessWidget{
   }
 
   Future<void> loginUser(BuildContext context) async {
-    var url = Uri.parse('http://localhost:8080/api/auth/login');
+    var url = Uri.parse('http://172.16.109.29:8080/api/auth/login');
 
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
@@ -188,7 +188,7 @@ class _Input extends StatelessWidget{
 
   // 브라우저에서 url 열기
   Future<void> _launchURL(String siteName) async {
-    final String loginUrl = "http://localhost:8080/oauth2/authorization/$siteName";
+    final String loginUrl = "http://172.16.109.29:8080/oauth2/authorization/$siteName";
 
     final Uri url = Uri.parse(loginUrl);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -226,7 +226,7 @@ class _Input extends StatelessWidget{
   Widget build(BuildContext context) {
     return
       Expanded(
-        flex: 6,
+        flex: 8,
         child: Container(
           height: 100,
           child: Column(
@@ -328,7 +328,7 @@ class _Input extends StatelessWidget{
                       backgroundColor: Colors.green
                   ),
                   onPressed: (){
-                    _launchURL('kakao');
+                    _launchURL('naver');
                   },
                   child: Text(
                     style: TextStyle(
