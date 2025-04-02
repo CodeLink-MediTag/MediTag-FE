@@ -165,7 +165,7 @@ class _Input extends StatelessWidget{
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MainScreen()),
+          MaterialPageRoute(builder: (context) => MainHomeSrceen()),
         );
 
 

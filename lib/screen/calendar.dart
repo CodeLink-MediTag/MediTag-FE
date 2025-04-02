@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'eatmed1.dart';
 import 'renew.dart';
 import 'package:untitled9/screen/main.dart';
 
@@ -52,7 +53,10 @@ class _Eatmed1State extends State<Eatmed1> {
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
                   onPressed: (){
-                    Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MainScreen()),
+                    );
                   },
                 ),
                 Text(
@@ -64,7 +68,7 @@ class _Eatmed1State extends State<Eatmed1> {
                   onPressed: (){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MainScreen()),
+                      MaterialPageRoute(builder: (context) => MainHomeSrceen()),
                     );
                   },
                 )

@@ -9,7 +9,7 @@ import 'package:untitled9/screen/settings.dart';
 
 
 
-class MainScreen extends StatelessWidget {
+class MainHomeSrceen extends StatelessWidget {
 
   String tokenValue = '';
 
