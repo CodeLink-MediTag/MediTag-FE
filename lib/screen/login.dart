@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled9/screen/main.dart';
 import 'package:untitled9/screen/account.dart';
@@ -98,7 +99,7 @@ class _Title extends StatelessWidget{
   Widget build(BuildContext context) {
     return
       Expanded(
-          flex: 4,
+          flex: 3,
           child: Container(
             height: 100,
             child: Column(
@@ -121,16 +122,18 @@ class _Title extends StatelessWidget{
 class _Input extends StatelessWidget{
   final TextEditingController usernameController = TextEditingController(text: 'test@gmail.com');
   final TextEditingController passwordController = TextEditingController(text: 'test12345');
-  String responseText = '';
+
 
 
   _Input({Key? key}): super(key: key);
 
-  void test () {
-    print("Hello World");
-  }
 
+  // 일반 로그인
   Future<void> loginUser(BuildContext context) async {
+
+    // 서버 반환값
+    String responseText = '';
+
     var url = Uri.parse('http://localhost:8080/api/auth/login');
 
     var headers = {"Content-Type": "application/json"};
@@ -151,7 +154,7 @@ class _Input extends StatelessWidget{
 
         responseText = data.toString();
 
-        await showPopupAndWait(context, "로그인 성공");
+        await showPopupAndWait(context, "로그인 성공", responseText);
 
 
 
@@ -173,12 +176,12 @@ class _Input extends StatelessWidget{
       } else {
         var data = jsonDecode(response.body);
         responseText = data.toString();
-        await showPopupAndWait(context, "로그인 실패");
+        await showPopupAndWait(context, "로그인 실패", responseText);
 
       }
     } catch (e, stackTrace) {
 
-      await showPopupAndWait(context, "에러발생 $e");
+      await showPopupAndWait(context, "에러발생 $e", responseText);
 
     }
 
@@ -186,13 +189,13 @@ class _Input extends StatelessWidget{
   }
 
   // 팝업 알림창
-  Future<void> showPopupAndWait(BuildContext context, String title) async {
+  Future<void> showPopupAndWait(BuildContext context, String title, String content) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
-          content: Text('서버 반환 내용:\n$responseText'),
+          content: Text('내용:\n$content'),
           actions: [
             TextButton(
               onPressed: () {
@@ -210,12 +213,53 @@ class _Input extends StatelessWidget{
     // 여기에 다음 로직을 이어서 작성하면 됩니다
   }
 
+  // 카톡 로그인
+  Future<void> _loginWithKakao(BuildContext context) async {
+    // 로그인상태
+    String loginStatus = "로그인 전";
+
+    try {
+      bool isInstalled = await isKakaoTalkInstalled(); // 카카오톡 설치 여부 확인
+      OAuthToken token;
+
+      if (isInstalled) {
+        token = await UserApi.instance.loginWithKakaoTalk();
+        print('✅ 카카오톡으로 로그인 성공: ${token.accessToken}');
+      } else {
+        token = await UserApi.instance.loginWithKakaoAccount();
+        print('✅ 카카오 계정으로 로그인 성공: ${token.accessToken}');
+      }
+
+      // ✅ 사용자 정보 가져오기
+      User user = await UserApi.instance.me();
+      print('🔹 닉네임: ${user.kakaoAccount?.profile?.nickname}');
+      print('🔹 이메일: ${user.kakaoAccount?.email}');
+      print('🔹 프로필 사진: ${user.kakaoAccount?.profile?.profileImageUrl}');
+      print('🔹 성별: ${user.kakaoAccount?.gender}');
+      print('🔹 연령대: ${user.kakaoAccount?.ageRange}');
+
+
+      loginStatus = """
+        로그인 성공!
+        닉네임: ${user.kakaoAccount?.profile?.nickname}
+        이메일: ${user.kakaoAccount?.email}
+      """;
+
+
+    } catch (error) {
+      print('❌ 로그인 실패: $error');
+      loginStatus = "로그인 실패: $error";
+    }
+
+    // 로그인 결과 팝업으로 띄우기
+    showPopupAndWait(context, "로그인결과", loginStatus);
+  }
 
   @override
   Widget build(BuildContext context) {
     return
       Expanded(
-        flex: 6,
+        flex: 7,
         child: Container(
           height: 100,
           child: Column(
@@ -291,6 +335,22 @@ class _Input extends StatelessWidget{
                   child: Text(
                     '회원가입',
                     // style: TextStyle(color: Colors.white),
+                  )
+              ),
+
+              SizedBox(height: 20,),
+
+              // 카카오 로그인
+              ElevatedButton(
+                  onPressed: (){
+                    _loginWithKakao(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow
+                  ),
+                  child: Text(
+                    '카카오 로그인',
+                    style: TextStyle(color: Colors.brown),
                   )
               )
 
