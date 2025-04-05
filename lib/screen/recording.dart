@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled9/screen/card_registration.dart';
+import 'package:untitled9/screen/recording_list.dart';
 
 
 class RecordingScreen extends StatelessWidget{
@@ -43,12 +45,16 @@ class HomeScreen extends StatelessWidget{
         children: [
           _TopBar(),
 
+          /*
           Expanded(
               child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: _MainView()
+                  child: RecordingList()
               )
           )
+
+           */
+          RecordingList()
 
         ],
       );
@@ -98,19 +104,18 @@ class _TopBar extends StatelessWidget{
           ],
         ),
       )
-
     ;
   }
 }
 
-class _MainView extends StatefulWidget{
+class _RecordingView extends StatefulWidget{
   @override
   State<StatefulWidget> createState() {
-    return _MainViewState();
+    return _RecordingViewState();
   }
 }
 
-class _MainViewState extends State<_MainView>{
+class _RecordingViewState extends State<_RecordingView>{
 
   late Widget content;
   bool mode = true;
@@ -229,6 +234,7 @@ class Recording extends StatelessWidget{
 }
 
 class RecordingStart extends StatelessWidget{
+
   VoidCallback onPressed;
 
   RecordingStart({
@@ -346,3 +352,4 @@ class RecordingStart extends StatelessWidget{
     ;
   }
 }
+

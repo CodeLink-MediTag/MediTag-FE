@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 날짜 포맷 라이브러리 추가
-import 'package:untitled9/screen/login.dart'; // 로그인 페이지 가져오기
+import 'package:untitled9/screen/login.dart';
+import 'package:untitled9/screen/recording.dart'; // 로그인 페이지 가져오기
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // ✅ Flutter 엔진 초기화
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(), // ✅ 로그인 화면이 첫 화면
+      home: RecordingScreen(), // ✅ 로그인 화면이 첫 화면
     );
   }
 }
