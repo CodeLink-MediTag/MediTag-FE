@@ -2,24 +2,42 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class SignupScreen extends StatelessWidget {
+
 
   final TextEditingController usernameController = TextEditingController(text: 'test@gmail.com');
   final TextEditingController nameController = TextEditingController(text: 'test');
   final TextEditingController phoneController = TextEditingController(text: '010-1234-5678');
   final TextEditingController passwordController = TextEditingController(text: 'test12345');
+  String? firebaseToken;
 
   String responseText = '';
 
+  Future<String?> getFirebaseToken() async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      final token = await messaging.getToken();
+      return token;
+    } catch (e) {
+      print('Firebase 토큰 가져오기 실패: $e');
+      return null;
+    }
+  }
+
   Future<void> registration(BuildContext context) async{
+    firebaseToken = await getFirebaseToken();
+    print('파이어베이스 토큰 : $firebaseToken');
     var url = Uri.parse('http://localhost:8080/api/member/register');
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
       "username": usernameController.text,
       "name": nameController.text,
       "phone": phoneController.text,
-      "password": passwordController.text
+      "password": passwordController.text,
+      "firebasetoken": firebaseToken
     });
 
     try{
