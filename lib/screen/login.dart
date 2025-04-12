@@ -141,51 +141,29 @@ class _Input extends StatelessWidget{
       "username": usernameController.text,
       "password": passwordController.text,
     });
-
     try {
       var response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
-
         // 서버에서 받은 토큰
         var data = jsonDecode(response.body);
         String token = data['accessToken'];
-
-
-
         responseText = data.toString();
-
         await showPopupAndWait(context, "로그인 성공", responseText);
-
-
-
         // SharedPreferences에 토큰 저장
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', token);
-
-
-
-
-
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
-
-
-
       } else {
         var data = jsonDecode(response.body);
         responseText = data.toString();
         await showPopupAndWait(context, "로그인 실패", responseText);
-
       }
     } catch (e, stackTrace) {
-
       await showPopupAndWait(context, "에러발생 $e", responseText);
-
     }
-
-
   }
 
   // 팝업 알림창
@@ -222,10 +200,16 @@ class _Input extends StatelessWidget{
       bool isInstalled = await isKakaoTalkInstalled(); // 카카오톡 설치 여부 확인
       OAuthToken token;
 
-      if (isInstalled) {
-        token = await UserApi.instance.loginWithKakaoTalk();
-        print('✅ 카카오톡으로 로그인 성공: ${token.accessToken}');
-      } else {
+      try {
+        if (isInstalled) {
+          token = await UserApi.instance.loginWithKakaoTalk();
+          print('✅ 카카오톡으로 로그인 성공: ${token.accessToken}');
+        } else {
+          token = await UserApi.instance.loginWithKakaoAccount();
+          print('✅ 카카오 계정으로 로그인 성공: ${token.accessToken}');
+        }
+      } catch (e) {
+        print('⚠️ 카카오톡 로그인 실패, 계정 로그인으로 재시도: $e');
         token = await UserApi.instance.loginWithKakaoAccount();
         print('✅ 카카오 계정으로 로그인 성공: ${token.accessToken}');
       }
@@ -245,14 +229,43 @@ class _Input extends StatelessWidget{
         이메일: ${user.kakaoAccount?.email}
       """;
 
+      // 서버 반환값
+      String responseText = '';
+
+      var url = Uri.parse('http://192.168.219.102:8080/api/auth/kakao-login');
+
+      var headers = {"Content-Type": "application/json"};
+      var body = jsonEncode({
+        "accessToken": token.accessToken
+      });
+      try {
+        var response = await http.post(url, headers: headers, body: body);
+        if (response.statusCode == 200) {
+          // 서버에서 받은 토큰
+          var data = jsonDecode(response.body);
+          String token = data['accessToken'];
+          responseText = data.toString();
+          await showPopupAndWait(context, "로그인 성공", responseText);
+          // SharedPreferences에 토큰 저장
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', token);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MainScreen()),
+          );
+        } else {
+          var data = jsonDecode(response.body);
+          responseText = data.toString();
+          await showPopupAndWait(context, "로그인 실패", responseText);
+        }
+      } catch (e, stackTrace) {
+        await showPopupAndWait(context, "에러발생 $e", responseText);
+      }
 
     } catch (error) {
       print('❌ 로그인 실패: $error');
       loginStatus = "로그인 실패: $error";
     }
-
-    // 로그인 결과 팝업으로 띄우기
-    showPopupAndWait(context, "로그인결과", loginStatus);
   }
 
   @override
