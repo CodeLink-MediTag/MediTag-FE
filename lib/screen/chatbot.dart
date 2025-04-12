@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
 
 class ChatBotScreen extends StatefulWidget {
   @override
@@ -9,6 +11,56 @@ class _ChatBotPageState extends State<ChatBotScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> messages = [];
   final ScrollController _scrollController = ScrollController();
+
+  // 음성인식을 위해 필요한 맴버변수
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = '말을 시작해보세요!';
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('Status: $val'),
+        onError: (val) => print('Error: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          /*
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords;
+            print(_text);
+          }),
+
+           */
+          onResult: (val) {
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              setState(() {
+                _isListening = false;
+                _speech.stop();
+                _text = val.recognizedWords;
+
+                /// 👇 메시지로 바로 추가
+                messages.add({'type': 'user', 'text': _text});
+                messages.add({'type': 'bot', 'text': '자동 응답: "$_text"에 대한 답변입니다.'});
+                _scrollToBottom();
+              });
+            }
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+    print("함수 종료 전 출력되는 텍스트");
+  }
 
   void _sendMessage() {
     String text = _controller.text.trim();
@@ -41,6 +93,7 @@ class _ChatBotPageState extends State<ChatBotScreen> {
             children: [
               Column(
                 children: [
+
                   // 상단 바
                   Container(
                     color: Color(0xFF547EE8),
@@ -129,8 +182,11 @@ class _ChatBotPageState extends State<ChatBotScreen> {
                 child: Center(
                   child: FloatingActionButton(
                     backgroundColor: Color(0xFF547EE8),
-                    onPressed: () {},
-                    child: Icon(Icons.mic, color: Colors.white, size: 28),
+                    onPressed: _listen,
+                    child: Icon(
+                      _isListening ? Icons.mic_off : Icons.mic,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
