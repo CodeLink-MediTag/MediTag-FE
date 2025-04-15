@@ -30,7 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  google_mlkit_text_recognition: ^0.10.0
+  flutter_tts: ^3.6.3
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -41,6 +42,9 @@ dependencies:
     sdk: flutter
   http: ^0.13.6
   shared_preferences: ^2.0.6
+
+dependency_overrides:
+  google_mlkit_commons: ^0.4.0
 
 dev_dependencies:
   flutter_test:
