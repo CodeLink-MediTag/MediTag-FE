@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:untitled9/screen/MedicationDetail.dart';
-
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart';
 
 class MedicationEdit extends StatefulWidget {
   final String name;
@@ -20,8 +22,8 @@ class MedicationEdit extends StatefulWidget {
     required this.alarmTime,
   });
 
-@override
-_MedicationEditState createState() => _MedicationEditState();
+  @override
+  _MedicationEditState createState() => _MedicationEditState();
 }
 
 class _MedicationEditState extends State<MedicationEdit> {
@@ -78,12 +80,15 @@ class _MedicationEditState extends State<MedicationEdit> {
 
   @override
   Widget build(BuildContext context) {
+    final setting = context.watch<SettingState>();
+    final colors = Theme.of(context).extension<MyColors>()!;
+
     return Scaffold(
-      backgroundColor: Color(0xFFF6F6F6),
+      backgroundColor: colors.background,
       body: Column(
         children: [
           Container(
-            color: Color(0xFF547EE8),
+            color: colors.primary,
             padding: EdgeInsets.only(top: 37, bottom: 12),
             child: Stack(
               alignment: Alignment.center,
@@ -92,16 +97,14 @@ class _MedicationEditState extends State<MedicationEdit> {
                   left: 0,
                   child: IconButton(
                     icon: Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 Center(
                   child: Text(
                     '정보 수정',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: setting.textSize + 6,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -110,7 +113,6 @@ class _MedicationEditState extends State<MedicationEdit> {
               ],
             ),
           ),
-
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(16.0),
@@ -119,34 +121,45 @@ class _MedicationEditState extends State<MedicationEdit> {
                   Container(
                     padding: EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors.secondary,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Color(0xFF547EE8), width: 2),
+                      border: Border.all(color: colors.primary, width: 2),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextField(
                           controller: nameController,
-                          decoration: InputDecoration(labelText: "약 이름"),
+                          style: TextStyle(fontSize: setting.textSize, color: colors.text),
+                          decoration: InputDecoration(
+                            labelText: "약 이름",
+                            labelStyle: TextStyle(fontSize: setting.textSize),
+                          ),
                         ),
                         ListTile(
-                          title: Text("복용 시작 날짜: ${DateFormat('yyyy-MM-dd').format(startDate)}"),
-                          trailing: Icon(Icons.calendar_today),
+                          title: Text(
+                            "복용 시작 날짜: ${DateFormat('yyyy-MM-dd').format(startDate)}",
+                            style: TextStyle(fontSize: setting.textSize, color: colors.text),
+                          ),
+                          trailing: Icon(Icons.calendar_today, color: colors.text),
                           onTap: _pickStartDate,
                         ),
                         TextField(
                           controller: durationController,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: "복용 기간 (일)"),
+                          style: TextStyle(fontSize: setting.textSize, color: colors.text),
+                          decoration: InputDecoration(
+                            labelText: "복용 기간 (일)",
+                            labelStyle: TextStyle(fontSize: setting.textSize),
+                          ),
                         ),
                         SizedBox(height: 16),
-                        Text("복용 시간대", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text("복용 시간대", style: TextStyle(fontWeight: FontWeight.bold, fontSize: setting.textSize, color: colors.text)),
                         Wrap(
                           spacing: 10,
                           children: ["아침", "점심", "저녁"].map((time) {
                             return ChoiceChip(
-                              label: Text(time),
+                              label: Text(time, style: TextStyle(fontSize: setting.textSize)),
                               selected: selectedTime == time,
                               onSelected: (selected) {
                                 setState(() {
@@ -157,12 +170,12 @@ class _MedicationEditState extends State<MedicationEdit> {
                           }).toList(),
                         ),
                         SizedBox(height: 16),
-                        Text("복용 주기", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text("복용 주기", style: TextStyle(fontWeight: FontWeight.bold, fontSize: setting.textSize, color: colors.text)),
                         Wrap(
                           spacing: 10,
                           children: ["1번", "2번", "3번"].map((freq) {
                             return ChoiceChip(
-                              label: Text(freq),
+                              label: Text(freq, style: TextStyle(fontSize: setting.textSize)),
                               selected: selectedFrequency == freq,
                               onSelected: (selected) {
                                 setState(() {
@@ -173,21 +186,18 @@ class _MedicationEditState extends State<MedicationEdit> {
                           }).toList(),
                         ),
                         ListTile(
-                          title: Text("알림 시간: ${alarmTime.format(context)}"),
-                          trailing: Icon(Icons.access_time),
+                          title: Text("알림 시간: ${alarmTime.format(context)}", style: TextStyle(fontSize: setting.textSize, color: colors.text)),
+                          trailing: Icon(Icons.access_time, color: colors.text),
                           onTap: _pickAlarmTime,
                         ),
                       ],
                     ),
                   ),
-
-                  SizedBox(height: 20), // 흰색 박스와 버튼 사이 간격 추가
-
-                  // 저장 버튼
+                  SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _saveChanges,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF547EE8),
+                      backgroundColor: colors.primary,
                       minimumSize: Size(358, 48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -196,7 +206,7 @@ class _MedicationEditState extends State<MedicationEdit> {
                     child: Text(
                       '저장',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: setting.textSize,
                         fontWeight: FontWeight.w400,
                         color: Colors.white,
                       ),

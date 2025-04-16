@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart';
 
 class Eatmed1 extends StatelessWidget {
   @override
@@ -19,96 +22,37 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-// Medicine 클래스: 약 정보를 담는 모델임
-class Medicine {
-  final String medicineName;    // 약 이름
-  final String characteristic;   // 약 특징
-  final String? imageUrl;       // 약 이미지 URL (null 가능)
-  final bool prescribed;        // 처방약 여부
-  final List<Alarm> alarms;     // 알람 목록
-
-  Medicine({
-    required this.medicineName,
-    required this.characteristic,
-    this.imageUrl,
-    required this.prescribed,
-    required this.alarms,
-  });
-
-  // JSON 데이터를 Medicine 객체로 변환하는 팩토리 생성자임
-  factory Medicine.fromJson(Map<String, dynamic> json) {
-    return Medicine(
-      medicineName: json['medicineName'],
-      characteristic: json['characteristic'],
-      imageUrl: json['imageUrl'],
-      prescribed: json['prescribed'],
-      alarms: (json['alarms'] as List)
-          .map((alarm) => Alarm.fromJson(alarm))
-          .toList(),
-    );
-  }
-}
-
-// Alarm 클래스: 약 복용 알람 정보를 담는 모델임
-class Alarm {
-  final DateTime alarmTime;  // 알람 시간
-  bool taking;              // 복용 여부
-
-  Alarm({
-    required this.alarmTime,
-    required this.taking,
-  });
-
-  // JSON 데이터를 Alarm 객체로 변환하는 팩토리 생성자임
-  factory Alarm.fromJson(Map<String, dynamic> json) {
-    return Alarm(
-      alarmTime: DateTime.parse(json['alarmTime']),
-      taking: json['taking'],
-    );
-  }
-}
-
 class _MainScreenState extends State<MainScreen> {
-  List<Medicine> medicines = [];  // 약 목록을 저장하는 리스트임
-  bool isLoading = true;         // 로딩 상태를 나타내는 플래그임
-  String currentDate = '';       // 현재 날짜를 저장하는 변수임
-  String? token;                 // 인증 토큰을 저장하는 변수임
+  List<Medicine> medicines = [];
+  bool isLoading = true;
+  String currentDate = '';
+  String? token;
 
   @override
   void initState() {
     super.initState();
-    _loadToken();  // 화면 초기화 시 토큰을 로드하는 함수 호출함
+    _loadToken();
   }
 
-  // SharedPreferences에서 토큰을 로드하는 함수임
   Future<void> _loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('token');
     });
-    fetchMedicines();  // 토큰 로드 후 약 정보를 가져오는 함수 호출함
+    fetchMedicines();
   }
 
-  // 서버에서 약 정보를 가져오는 함수임
   Future<void> fetchMedicines() async {
     if (token == null) {
-      print('토큰이 없습니다. 로그인이 필요합니다.');
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
       return;
     }
 
-    setState(() {
-      isLoading = true;  // 로딩 시작을 표시함
-    });
-
+    setState(() => isLoading = true);
     try {
-      // 오늘 날짜를 yyyy-MM-dd 형식으로 포맷팅함
       String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
       currentDate = today;
 
-      // HTTP GET 요청을 보내 약 정보를 가져옴
       final response = await http.get(
         Uri.parse('http://localhost:8080/api/medicines?date=$today'),
         headers: {
@@ -118,7 +62,6 @@ class _MainScreenState extends State<MainScreen> {
       );
 
       if (response.statusCode == 200) {
-        // 응답 데이터를 파싱하여 Medicine 객체 리스트로 변환함
         final Map<String, dynamic> data = json.decode(response.body);
         List<Medicine> fetchedMedicines = (data['medicines'] as List)
             .map((medicine) => Medicine.fromJson(medicine))
@@ -126,38 +69,21 @@ class _MainScreenState extends State<MainScreen> {
 
         setState(() {
           medicines = fetchedMedicines;
-          isLoading = false;  // 로딩 완료를 표시함
-        });
-      } else if (response.statusCode == 401) {
-        // 토큰이 만료된 경우 처리 로직임
-        print('토큰이 만료되었습니다. 다시 로그인해주세요.');
-        setState(() {
           isLoading = false;
         });
       } else {
-        setState(() {
-          isLoading = false;
-        });
-        print('Failed to load medicines: ${response.statusCode}');
+        setState(() => isLoading = false);
       }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching medicines: $e');
+      setState(() => isLoading = false);
     }
   }
 
-  // 약 복용 상태를 업데이트하는 함수임
   Future<void> updateMedicineTaking(Medicine medicine, Alarm alarm) async {
-    if (token == null) {
-      print('토큰이 없습니다. 로그인이 필요합니다.');
-      return;
-    }
+    if (token == null) return;
 
     try {
-      // HTTP POST 요청으로 복용 상태를 서버에 업데이트함
-      final response = await http.post(
+      await http.post(
         Uri.parse('http://localhost:8080/api/medicines/taking'),
         headers: {
           'Content-Type': 'application/json',
@@ -169,27 +95,19 @@ class _MainScreenState extends State<MainScreen> {
           'taking': alarm.taking,
         }),
       );
-
-      if (response.statusCode == 200) {
-        print('약 복용 상태가 업데이트되었습니다.');
-      } else {
-        print('약 복용 상태 업데이트 실패: ${response.statusCode}');
-      }
     } catch (e) {
       print('약 복용 상태 업데이트 중 오류 발생: $e');
     }
   }
 
-  // 약 복용 상태를 토글하는 함수임
   void _toggleTaking(Medicine medicine, Alarm alarm) {
-    setState(() {
-      alarm.taking = !alarm.taking;
-    });
-    // 서버에 복용 상태 업데이트를 요청함
+    setState(() => alarm.taking = !alarm.taking);
     updateMedicineTaking(medicine, alarm);
   }
 
   void _showMedicationDialog(Medicine medicine, Alarm alarm) {
+    final setting = Provider.of<SettingState>(context, listen: false);
+    final colors = Theme.of(context).extension<MyColors>()!;
     String formattedTime = DateFormat('a hh:mm', 'ko_KR').format(alarm.alarmTime);
 
     showDialog(
@@ -201,19 +119,20 @@ class _MainScreenState extends State<MainScreen> {
             width: 330,
             height: 210,
             padding: EdgeInsets.all(20),
+            color: colors.secondary,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(medicine.medicineName, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                Text(medicine.medicineName, style: TextStyle(fontSize: setting.textSize + 6, fontWeight: FontWeight.bold, color: colors.text)),
                 SizedBox(height: 10),
-                Text("$formattedTime에 약을 드셨나요?", style: TextStyle(fontSize: 19, color: Colors.grey)),
+                Text("$formattedTime에 약을 드셨나요?", style: TextStyle(fontSize: setting.textSize, color: colors.text.withOpacity(0.7))),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF547EE8),
+                        backgroundColor: colors.primary,
                         fixedSize: Size(128, 54),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
@@ -221,16 +140,16 @@ class _MainScreenState extends State<MainScreen> {
                         _toggleTaking(medicine, alarm);
                         Navigator.pop(context);
                       },
-                      child: Text("네", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white)),
+                      child: Text("네", style: TextStyle(fontSize: setting.textSize, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey.shade300,
+                        backgroundColor: colors.divider.withOpacity(0.3),
                         fixedSize: Size(128, 54),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: Text("아니요", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black)),
+                      child: Text("아니요", style: TextStyle(fontSize: setting.textSize, fontWeight: FontWeight.bold, color: colors.text)),
                     ),
                   ],
                 ),
@@ -244,49 +163,44 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final setting = Provider.of<SettingState>(context);
+    final colors = Theme.of(context).extension<MyColors>()!;
+
     return Scaffold(
+      backgroundColor: colors.background,
       body: Column(
         children: [
-          // 앱바 대체용 Container
           Container(
-            color: Color(0xFF547EE8),
+            color: colors.primary,
             padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: (){
-                      Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
-                    },
-                  ),
-                  Text(
-                    '메인 화면',
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                Text('메인 화면',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 22,
+                      fontSize: setting.textSize + 4,
                       color: Colors.white,
-                    ),
+                    )),
+                IconButton(
+                  icon: Icon(Icons.calendar_today, color: Colors.white),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CalendarScreen()),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.calendar_today, color: Colors.white),
-                    onPressed: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => CalendarScreen()),
-                      );
-                    },
-                  )
-                ]
+                ),
+              ],
             ),
           ),
-
-          // 본문
           Expanded(
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
                 : medicines.isEmpty
-                ? Center(child: Text('등록된 약이 없습니다.', style: TextStyle(fontSize: 18)))
+                ? Center(child: Text('등록된 약이 없습니다.', style: TextStyle(fontSize: setting.textSize, color: colors.text)))
                 : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -294,13 +208,13 @@ class _MainScreenState extends State<MainScreen> {
                   SizedBox(height: 20),
                   ...medicines.map((medicine) => Column(
                     children: [
-                      _buildMedicationCard(medicine),
+                      _buildMedicationCard(medicine, setting.textSize, colors),
                       SizedBox(height: 40),
                     ],
-                  )).toList(),
+                  )),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF547EE8),
+                      backgroundColor: colors.primary,
                       minimumSize: Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
@@ -310,7 +224,7 @@ class _MainScreenState extends State<MainScreen> {
                         MaterialPageRoute(builder: (context) => RenewScreen()),
                       );
                     },
-                    child: Text('알림 받을 약 추가', style: TextStyle(fontSize: 18, color: Colors.white)),
+                    child: Text('알림 받을 약 추가', style: TextStyle(fontSize: setting.textSize, color: Colors.white)),
                   ),
                 ],
               ),
@@ -321,14 +235,14 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildMedicationCard(Medicine medicine) {
+  Widget _buildMedicationCard(Medicine medicine, double fontSize, MyColors colors) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.secondary,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFF547EE8), width: 2),
+        border: Border.all(color: colors.primary, width: 2),
         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
       child: Column(
@@ -340,7 +254,7 @@ class _MainScreenState extends State<MainScreen> {
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colors.divider,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: medicine.imageUrl != null && medicine.imageUrl!.isNotEmpty
@@ -349,9 +263,7 @@ class _MainScreenState extends State<MainScreen> {
                   child: Image.network(
                     medicine.imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.image, color: Colors.grey, size: 35);
-                    },
+                    errorBuilder: (context, error, stackTrace) => Icon(Icons.image, color: Colors.grey, size: 35),
                   ),
                 )
                     : Icon(Icons.image, color: Colors.grey, size: 35),
@@ -360,18 +272,16 @@ class _MainScreenState extends State<MainScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(medicine.medicineName, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  Text(medicine.medicineName, style: TextStyle(fontSize: fontSize + 4, fontWeight: FontWeight.bold, color: colors.text)),
                   IconButton(
                     icon: Icon(Icons.arrow_forward_ios, size: 20, color: Colors.grey),
-                    onPressed: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MedicationDetail()),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MedicationDetail()),
+                    ),
                   ),
                   SizedBox(height: 5),
-                  Text(medicine.characteristic, style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Text(medicine.characteristic, style: TextStyle(fontSize: fontSize, color: colors.text.withOpacity(0.6))),
                 ],
               ),
             ],
@@ -382,7 +292,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Row(
-                children: medicine.alarms.map((alarm) => _buildTimeButton(medicine, alarm)).toList(),
+                children: medicine.alarms.map((alarm) => _buildTimeButton(medicine, alarm, fontSize, colors)).toList(),
               ),
             ),
           ),
@@ -391,14 +301,14 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildTimeButton(Medicine medicine, Alarm alarm) {
+  Widget _buildTimeButton(Medicine medicine, Alarm alarm, double fontSize, MyColors colors) {
     String formattedTime = DateFormat('a hh:mm', 'ko_KR').format(alarm.alarmTime);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: alarm.taking ? Color(0xFFA3BCF1) : Colors.white,
+          backgroundColor: alarm.taking ? colors.primary.withOpacity(0.7) : colors.secondary,
           minimumSize: Size(110, 55),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
@@ -411,272 +321,43 @@ class _MainScreenState extends State<MainScreen> {
         },
         child: Text(
           alarm.taking ? '복용 완료!' : formattedTime,
-          style: TextStyle(fontSize: 14, color: alarm.taking ? Colors.white : Colors.black),
+          style: TextStyle(fontSize: fontSize - 2, color: alarm.taking ? Colors.white : colors.text),
         ),
       ),
     );
   }
 }
 
+class Medicine {
+  final String medicineName;
+  final String characteristic;
+  final String? imageUrl;
+  final bool prescribed;
+  final List<Alarm> alarms;
 
-// import 'package:flutter/material.dart';
-// import 'package:untitled9/screen/renew.dart';
-// import 'package:untitled9/screen/MedicationDetail.dart';
-// import 'package:untitled9/screen/calendar.dart';
-//
-//
-// class Eatmed1 extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return
-//       MainScreen();
-//   }
-// }
-//
-// class MainScreen extends StatefulWidget {
-//   @override
-//   _MainScreenState createState() => _MainScreenState();
-// }
-//
-// class _MainScreenState extends State<MainScreen> {
-//   Map<String, String> medicationTimes = {
-//     '처방약_1': '오전 09:00',
-//     '처방약_2': '오후 02:00',
-//     '처방약_3': '오후 08:00',
-//     '비타민_1': '오전 09:00',
-//     '비타민_2': '오후 08:00',
-//   };
-//
-//   Map<String, String> originalTimes = {}; // 원래 시간 저장용
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     originalTimes.addAll(medicationTimes);
-//   }
-//
-//   void toggleTime(String key) {
-//     setState(() {
-//       if (medicationTimes[key] == '복용 완료!') {
-//         medicationTimes[key] = originalTimes[key]!; // 원래 시간으로 복구
-//       } else {
-//         _showMedicationDialog(key);
-//       }
-//     });
-//   }
-//
-//   void _confirmMedication(String key) {
-//     setState(() {
-//       medicationTimes[key] = '복용 완료!';
-//     });
-//   }
-//
-//   void _showMedicationDialog(String key) {
-//     String currentTime = medicationTimes[key]!;
-//
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return Dialog(
-//           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//           child: Container(
-//             width: 330,
-//             height: 210,
-//             padding: EdgeInsets.all(20),
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 Text("처방약", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-//                 SizedBox(height: 10),
-//                 Text("$currentTime에 약을 드셨나요?", style: TextStyle(fontSize: 19, color: Colors.grey)),
-//                 SizedBox(height: 20),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                   children: [
-//                     ElevatedButton(
-//                       style: ElevatedButton.styleFrom(
-//                         backgroundColor: Color(0xFF547EE8),
-//                         fixedSize: Size(128, 54),
-//                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//                       ),
-//                       onPressed: () {
-//                         _confirmMedication(key);
-//                         Navigator.pop(context);
-//                       },
-//                       child: Text("네", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white)),
-//                     ),
-//                     TextButton(
-//                       style: TextButton.styleFrom(
-//                         backgroundColor: Colors.grey.shade300,
-//                         fixedSize: Size(128, 54),
-//                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//                       ),
-//                       onPressed: () => Navigator.pop(context),
-//                       child: Text("아니요", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black)),
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Column(
-//         children: [
-//           // 앱바 대체용 Container
-//           Container(
-//             color: Color(0xFF547EE8),
-//             padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 IconButton(
-//                   icon: Icon(Icons.arrow_back, color: Colors.white),
-//                   onPressed: (){
-//                     Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
-//                   },
-//                 ),
-//                 Text(
-//                   '메인 화면',
-//                   style: TextStyle(
-//                     fontWeight: FontWeight.bold,
-//                     fontSize: 22,
-//                     color: Colors.white,
-//                   ),
-//                 ),
-//                 IconButton(
-//                 icon: Icon(Icons.calendar_today, color: Colors.white),
-//                   onPressed: (){
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(builder: (context) => CalendarScreen()),
-//                     );
-//                   },
-//                 )
-//               ]
-//             ),
-//           ),
-//
-//           // 본문
-//           Expanded(
-//             child: Padding(
-//               padding: const EdgeInsets.all(16.0),
-//               child: Column(
-//                 children: [
-//                   SizedBox(height: 20),
-//                   _buildMedicationCard('처방약', '긴 상자', ['처방약_1', '처방약_2', '처방약_3']),
-//                   SizedBox(height: 40),
-//                   _buildMedicationCard('비타민', '원형 긴 통', ['비타민_1', '비타민_2']),
-//                   SizedBox(height: 40),
-//                   ElevatedButton(
-//                     style: ElevatedButton.styleFrom(
-//                       backgroundColor: Color(0xFF547EE8),
-//                       minimumSize: Size(double.infinity, 50),
-//                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//                     ),
-//                     onPressed: () {
-//                       Navigator.push(
-//                         context,
-//                         MaterialPageRoute(builder: (context) => RenewScreen()),
-//                       );
-//                     },
-//                     child: Text('알림 받을 약 추가', style: TextStyle(fontSize: 18, color: Colors.white)),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildMedicationCard(String title, String subtitle, List<String> timeKeys) {
-//     return Container(
-//       width: double.infinity,
-//       padding: EdgeInsets.all(16),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(16),
-//         border: Border.all(color: Color(0xFF547EE8), width: 2),
-//         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             children: [
-//               Container(
-//                 width: 70,
-//                 height: 70,
-//                 decoration: BoxDecoration(
-//                   color: Colors.grey.shade300,
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//                 child: Icon(Icons.image, color: Colors.grey, size: 35),
-//               ),
-//               SizedBox(width: 15),
-//               Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-//                   IconButton(
-//                     icon: Icon(Icons.arrow_forward_ios, size: 20, color: Colors.grey),
-//                     onPressed: (){
-//                       Navigator.push(
-//                         context,
-//                         MaterialPageRoute(builder: (context) => MedicationDetail()),
-//                       );
-//                     },
-//                   ),
-//                   SizedBox(height: 5),
-//                   Text(subtitle, style: TextStyle(fontSize: 18, color: Colors.grey)),
-//                 ],
-//               ),
-//             ],
-//           ),
-//           SizedBox(height: 15),
-//           SingleChildScrollView(
-//             scrollDirection: Axis.horizontal,
-//             child: Container(
-//               padding: EdgeInsets.symmetric(vertical: 8),
-//               child: Row(
-//                 children: timeKeys.map((key) => _buildTimeButton(key)).toList(),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildTimeButton(String key) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-//       child: ElevatedButton(
-//         style: ElevatedButton.styleFrom(
-//           backgroundColor: medicationTimes[key] == '복용 완료!' ? Color(0xFFA3BCF1) : Colors.white,
-//           minimumSize: Size(110, 55),
-//           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//         ),
-//         onPressed: () {
-//           if (medicationTimes[key] == '복용 완료!') {
-//             toggleTime(key);
-//           } else {
-//             _showMedicationDialog(key);
-//           }
-//         },
-//         child: Text(
-//           medicationTimes[key]!,
-//           style: TextStyle(fontSize: 14, color: medicationTimes[key] == '복용 완료!' ? Colors.white : Colors.black),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  Medicine({required this.medicineName, required this.characteristic, this.imageUrl, required this.prescribed, required this.alarms});
+
+  factory Medicine.fromJson(Map<String, dynamic> json) {
+    return Medicine(
+      medicineName: json['medicineName'],
+      characteristic: json['characteristic'],
+      imageUrl: json['imageUrl'],
+      prescribed: json['prescribed'],
+      alarms: (json['alarms'] as List).map((alarm) => Alarm.fromJson(alarm)).toList(),
+    );
+  }
+}
+
+class Alarm {
+  final DateTime alarmTime;
+  bool taking;
+
+  Alarm({required this.alarmTime, required this.taking});
+
+  factory Alarm.fromJson(Map<String, dynamic> json) {
+    return Alarm(
+      alarmTime: DateTime.parse(json['alarmTime']),
+      taking: json['taking'],
+    );
+  }
+}

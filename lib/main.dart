@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart'; // 날짜 포맷 라이브러리 추가
-import 'package:untitled9/screen/login.dart'; // 로그인 페이지 가져오기
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/login.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart'; // ✅ ThemeExtension 정의한 파일
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // ✅ Flutter 엔진 초기화
-  await initializeDateFormatting('ko_KR', null); // ✅ 한국어 날짜 포맷 사용 가능하도록 설정
-  runApp(const MyApp()); // ✅ MyApp 실행
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR', null);
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => SettingState(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,9 +22,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    final isDark = context.watch<SettingState>().isDarkMode;
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(), // ✅ 로그인 화면이 첫 화면
+      theme: ThemeData(
+        brightness: Brightness.light,
+        extensions: const <ThemeExtension<dynamic>>[
+          MyColors.light,
+        ],
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        extensions: const <ThemeExtension<dynamic>>[
+          MyColors.dark,
+        ],
+      ),
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      home: const Login(),
     );
   }
 }

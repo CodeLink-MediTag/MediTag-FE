@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:untitled9/screen/eatmed1.dart';
-
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart';
 
 class RenewpoScreen extends StatelessWidget {
   const RenewpoScreen({super.key});
@@ -28,7 +30,6 @@ class _RenewdayState extends State<RenewdayScreen> {
   ];
   File? selectedImage;
 
-  // 시간 선택 함수
   Future<void> selectTime(BuildContext context, int index) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -41,7 +42,6 @@ class _RenewdayState extends State<RenewdayScreen> {
     }
   }
 
-  // 사진 선택 함수
   Future<void> pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -53,27 +53,29 @@ class _RenewdayState extends State<RenewdayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textSize = context.watch<SettingState>().textSize;
+    final colors = Theme.of(context).extension<MyColors>()!;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Column(
         children: [
-          // AppBar
           Container(
-            color: Color(0xFF547EE8),
+            color: colors.primary,
             padding: const EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
               children: [
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
-                  onPressed: (){
-                    Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+                  onPressed: () {
+                    Navigator.pop(context);
                   },
                 ),
-                const Expanded(
+                Expanded(
                   child: Center(
                     child: Text(
                       '복약 알림 등록',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: textSize + 6, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
@@ -81,23 +83,19 @@ class _RenewdayState extends State<RenewdayScreen> {
               ],
             ),
           ),
-
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ListView(
                 children: [
                   const SizedBox(height: 0),
-                  const Text(
+                  Text(
                     "마지막으로 알림을 원하는 시간을 등록해주세요!\n사진이 있다면 사진을 등록해도 좋아요.",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: textSize - 2, fontWeight: FontWeight.bold, color: colors.text),
                   ),
                   const SizedBox(height: 20),
-
-                  // 알림 시간
-                  const Text("알림 시간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("알림 시간", style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold, color: colors.text)),
                   const SizedBox(height: 8),
-
                   Column(
                     children: List.generate(alarmTimes.length, (index) {
                       return Padding(
@@ -107,7 +105,7 @@ class _RenewdayState extends State<RenewdayScreen> {
                           child: Container(
                             height: 53,
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
+                              border: Border.all(color: colors.divider),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -118,9 +116,9 @@ class _RenewdayState extends State<RenewdayScreen> {
                                   DateFormat('a hh:mm', 'ko_KR').format(
                                     DateTime(2000, 1, 1, alarmTimes[index].hour, alarmTimes[index].minute),
                                   ),
-                                  style: const TextStyle(fontSize: 18),
+                                  style: TextStyle(fontSize: textSize - 2, color: colors.text),
                                 ),
-                                const Icon(Icons.access_time, color: Colors.grey),
+                                Icon(Icons.access_time, color: colors.text),
                               ],
                             ),
                           ),
@@ -129,16 +127,14 @@ class _RenewdayState extends State<RenewdayScreen> {
                     }),
                   ),
                   const SizedBox(height: 20),
-
-                  // 사진 업로드
-                  const Text("사진", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("사진", style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold, color: colors.text)),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: pickImage,
                     child: Container(
                       height: 53,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: colors.divider),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -146,9 +142,9 @@ class _RenewdayState extends State<RenewdayScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           selectedImage == null
-                              ? const Text("사진이 있다면 등록해주세요!", style: TextStyle(fontSize: 16, color: Colors.grey))
-                              : const Text("사진 선택됨", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          const Icon(Icons.image, color: Colors.grey),
+                              ? Text("사진이 있다면 등록해주세요!", style: TextStyle(fontSize: textSize - 2, color: colors.text.withOpacity(0.5)))
+                              : Text("사진 선택됨", style: TextStyle(fontSize: textSize - 2, fontWeight: FontWeight.bold, color: colors.text)),
+                          Icon(Icons.image, color: colors.text),
                         ],
                       ),
                     ),
@@ -158,8 +154,6 @@ class _RenewdayState extends State<RenewdayScreen> {
               ),
             ),
           ),
-
-          // 등록 버튼
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: SizedBox(
@@ -167,7 +161,7 @@ class _RenewdayState extends State<RenewdayScreen> {
               height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF547EE8),
+                  backgroundColor: colors.primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: () {
@@ -175,11 +169,10 @@ class _RenewdayState extends State<RenewdayScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => Eatmed1()),
                   );
-                  // 알림 등록 로직 추가 가능
                 },
-                child: const Text(
+                child: Text(
                   "등록",
-                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: textSize, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

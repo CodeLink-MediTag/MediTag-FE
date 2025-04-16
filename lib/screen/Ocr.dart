@@ -5,21 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:image_picker/image_picker.dart';
-
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'OCR + TTS 데모 (웹 호환)',
-      home: const OCRScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
 
 class OCRScreen extends StatefulWidget {
   const OCRScreen({super.key});
@@ -85,8 +72,19 @@ class _OCRScreenState extends State<OCRScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final setting = context.watch<SettingState>();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('OCR + 음성출력 (웹 호환)')),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text(
+          'OCR + 음성출력 (웹 호환)',
+          style: TextStyle(
+            fontSize: setting.textSize + 4,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -97,9 +95,9 @@ class _OCRScreenState extends State<OCRScreen> {
             if (isLoading)
               const CircularProgressIndicator()
             else if (scannedText.isNotEmpty)
-              Text('인식된 텍스트: $scannedText')
+              Text('인식된 텍스트: $scannedText', style: TextStyle(fontSize: setting.textSize))
             else
-              const Text('이미지를 선택하거나 촬영해주세요'),
+              Text('이미지를 선택하거나 촬영해주세요', style: TextStyle(fontSize: setting.textSize)),
             const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -107,12 +105,20 @@ class _OCRScreenState extends State<OCRScreen> {
                 ElevatedButton.icon(
                   onPressed: () => _getImage(ImageSource.camera),
                   icon: const Icon(Icons.camera_alt),
-                  label: const Text('카메라'),
+                  label: Text('카메라', style: TextStyle(fontSize: setting.textSize)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => _getImage(ImageSource.gallery),
                   icon: const Icon(Icons.photo),
-                  label: const Text('갤러리'),
+                  label: Text('갤러리', style: TextStyle(fontSize: setting.textSize)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             )

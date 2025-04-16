@@ -1,10 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart';
 
 class SignupScreen extends StatelessWidget {
-
   final TextEditingController usernameController = TextEditingController(text: 'test@gmail.com');
   final TextEditingController nameController = TextEditingController(text: 'test');
   final TextEditingController phoneController = TextEditingController(text: '010-1234-5678');
@@ -12,7 +13,7 @@ class SignupScreen extends StatelessWidget {
 
   String responseText = '';
 
-  Future<void> registration(BuildContext context) async{
+  Future<void> registration(BuildContext context) async {
     var url = Uri.parse('http://localhost:8080/api/member/register');
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
@@ -22,48 +23,48 @@ class SignupScreen extends StatelessWidget {
       "password": passwordController.text
     });
 
-    try{
+    try {
       var response = await http.post(url, headers: headers, body: body);
       var data = jsonDecode(response.body);
       responseText = data.toString();
       if (response.statusCode == 200) {
         await showPopupAndWait(context, "회원가입 성공");
-        Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
-      }else{
+        Navigator.pop(context);
+      } else {
         await showPopupAndWait(context, "회원가입 실패");
       }
-    }catch(e){
+    } catch (e) {
       await showPopupAndWait(context, "에러: $e");
     }
   }
 
   Future<void> showPopupAndWait(BuildContext context, String title) async {
+    final setting = Provider.of<SettingState>(context, listen: false);
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title),
-          content: Text('서버 반환 내용:\n$responseText'),
+          title: Text(title, style: TextStyle(fontSize: setting.textSize)),
+          content: Text('서버 반환 내용:\n$responseText', style: TextStyle(fontSize: setting.textSize)),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 확인 누르면 dialog 닫히고 함수가 다시 이어짐
-              },
-              child: Text('확인'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('확인', style: TextStyle(fontSize: setting.textSize)),
             ),
           ],
         );
       },
     );
-
-    // 이 아래 코드는 팝업이 닫힌 후 실행됨
-    print('사용자가 확인을 눌렀습니다!');
-    // 여기에 다음 로직을 이어서 작성하면 됩니다
   }
 
   @override
   Widget build(BuildContext context) {
+    final setting = Provider.of<SettingState>(context);
+    final colors = Theme.of(context).extension<MyColors>()!;
+
     return Scaffold(
+      backgroundColor: colors.background,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
@@ -74,33 +75,30 @@ class SignupScreen extends StatelessWidget {
               child: Text(
                 '회원가입',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: setting.textSize + 6,
                   fontWeight: FontWeight.bold,
+                  color: colors.text,
                 ),
               ),
             ),
             SizedBox(height: 30),
-            _buildInputField('아이디', '아이디 입력', usernameController),
-            _buildInputField('이름', '이름 입력', nameController),
-            _buildInputField('전화번호', '010-0000-0000', phoneController),
-            _buildInputField('비밀번호', '비밀번호', passwordController, isPassword: true),
+            _buildInputField('아이디', '아이디 입력', usernameController, setting, colors),
+            _buildInputField('이름', '이름 입력', nameController, setting, colors),
+            _buildInputField('전화번호', '010-0000-0000', phoneController, setting, colors),
+            _buildInputField('비밀번호', '비밀번호', passwordController, setting, colors, isPassword: true),
             SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  registration(context);
-                },
+                onPressed: () => registration(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF547EE8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  backgroundColor: colors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: Text(
                   '회원가입',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  style: TextStyle(fontSize: setting.textSize, color: Colors.white),
                 ),
               ),
             ),
@@ -110,7 +108,7 @@ class SignupScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField(String label, String hint, TextEditingController controller, {bool isPassword = false}) {
+  Widget _buildInputField(String label, String hint, TextEditingController controller, SettingState setting, MyColors colors, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: Column(
@@ -118,16 +116,18 @@ class SignupScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: setting.textSize - 2, fontWeight: FontWeight.w500, color: colors.text),
           ),
           SizedBox(height: 5),
           TextField(
             controller: controller,
             obscureText: isPassword,
+            style: TextStyle(fontSize: setting.textSize, color: colors.text),
             decoration: InputDecoration(
               hintText: hint,
+              hintStyle: TextStyle(fontSize: setting.textSize, color: Colors.grey),
               filled: true,
-              fillColor: Colors.grey[200],
+              fillColor: colors.secondary,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,

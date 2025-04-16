@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:untitled9/screen/renewpo.dart';
-
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart';
 
 class RenewdayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return
-      RenewScreen();
+    return RenewScreen();
   }
 }
 
@@ -37,20 +38,23 @@ class _RenewState extends State<RenewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textSize = context.watch<SettingState>().textSize;
+    final colors = Theme.of(context).extension<MyColors>()!;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Column(
         children: [
           Container(
-            color: Color(0xFF547EE8),
+            color: colors.primary,
             padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
-                  onPressed: (){
-                    Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+                  onPressed: () {
+                    Navigator.pop(context);
                   },
                 ),
                 Expanded(
@@ -58,7 +62,7 @@ class _RenewState extends State<RenewScreen> {
                     child: Text(
                       '복약 알림 등록',
                       style: TextStyle(
-                        fontSize: 26,
+                        fontSize: textSize + 6,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -77,10 +81,10 @@ class _RenewState extends State<RenewScreen> {
                   SizedBox(height: 20),
                   Text(
                     "복용 주기, 복용 시작 날짜, 기간을 입력해주세요!",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold, color: colors.text),
                   ),
                   SizedBox(height: 20),
-                  Text("복용 주기", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("복용 주기", style: TextStyle(fontSize: textSize + 4, fontWeight: FontWeight.bold, color: colors.text)),
                   SizedBox(height: 8),
                   Row(
                     children: ["아침", "점심", "저녁"].map((time) {
@@ -95,14 +99,14 @@ class _RenewState extends State<RenewScreen> {
                               });
                             },
                           ),
-                          Text(time, style: TextStyle(fontSize: 14)),
+                          Text(time, style: TextStyle(fontSize: textSize, color: colors.text)),
                           SizedBox(width: 10),
                         ],
                       );
                     }).toList(),
                   ),
                   SizedBox(height: 20),
-                  Text("복용 시작 날짜", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("복용 시작 날짜", style: TextStyle(fontSize: textSize + 4, fontWeight: FontWeight.bold, color: colors.text)),
                   SizedBox(height: 8),
                   GestureDetector(
                     onTap: () => _selectDate(context),
@@ -115,14 +119,14 @@ class _RenewState extends State<RenewScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("${selectedDate.toLocal()}".split(' ')[0], style: TextStyle(fontSize: 16)),
+                          Text("${selectedDate.toLocal()}".split(' ')[0], style: TextStyle(fontSize: textSize, color: colors.text)),
                           Icon(Icons.edit, color: Colors.grey),
                         ],
                       ),
                     ),
                   ),
                   SizedBox(height: 20),
-                  Text("복용 기간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("복용 기간", style: TextStyle(fontSize: textSize + 4, fontWeight: FontWeight.bold, color: colors.text)),
                   SizedBox(height: 8),
                   Column(
                     children: ["3일", "5일", "1개월", "1년", "매일"].map((period) {
@@ -136,7 +140,7 @@ class _RenewState extends State<RenewScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: RadioListTile(
-                            title: Text(period, style: TextStyle(fontSize: 20)),
+                            title: Text(period, style: TextStyle(fontSize: textSize, color: colors.text)),
                             value: period,
                             groupValue: selectedPeriod,
                             onChanged: (value) {
@@ -144,7 +148,7 @@ class _RenewState extends State<RenewScreen> {
                                 selectedPeriod = value as String;
                               });
                             },
-                            activeColor: Colors.blue,
+                            activeColor: colors.primary,
                             controlAffinity: ListTileControlAffinity.trailing,
                           ),
                         ),
@@ -163,10 +167,10 @@ class _RenewState extends State<RenewScreen> {
               height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF547EE8),
+                  backgroundColor: colors.primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: (){
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => RenewpoScreen()),
@@ -174,7 +178,7 @@ class _RenewState extends State<RenewScreen> {
                 },
                 child: Text(
                   "다음",
-                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: textSize, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

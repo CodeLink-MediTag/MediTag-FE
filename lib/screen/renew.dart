@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:untitled9/screen/renewday.dart';
-
+import 'package:provider/provider.dart';
+import 'package:untitled9/screen/setting_state.dart';
+import 'package:untitled9/screen/my_colors.dart';
 
 class RenewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return
-      Eatmed1();
+    return Eatmed1();
   }
 }
 
@@ -18,22 +19,24 @@ class Eatmed1 extends StatefulWidget {
 class _Eatmed1State extends State<Eatmed1> {
   @override
   Widget build(BuildContext context) {
+    final setting = context.watch<SettingState>();
+    final colors = Theme.of(context).extension<MyColors>()!;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Column(
         children: [
-          // AppBar
           Container(
-            color: Color(0xFF547EE8),
+            color: colors.primary,
             padding: EdgeInsets.only(top: 37, bottom: 12, left: 16, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
-              crossAxisAlignment: CrossAxisAlignment.center, // 아이콘과 텍스트 수직 중앙 정렬
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 IconButton(
                   icon: Icon(Icons.close, color: Colors.white, size: 30),
-                  onPressed: (){
-                    Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+                  onPressed: () {
+                    Navigator.pop(context);
                   },
                 ),
                 Expanded(
@@ -41,34 +44,41 @@ class _Eatmed1State extends State<Eatmed1> {
                     child: Text(
                       '복약 알림 등록',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: setting.textSize + 4,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // 텍스트 색상 흰색
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 40), // 오른쪽 여백
+                SizedBox(width: 40),
               ],
             ),
           ),
-
-          // 나머지 화면
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 30), // 여백 조정
+                  SizedBox(height: 30),
                   Text(
                     "약의 이름과 특징을 입력해 주세요!",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: setting.textSize,
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
                   ),
-                  SizedBox(height: 30), // 여백 추가
-
-                  // 이름 등록
-                  Text("이름 등록", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 30),
+                  Text(
+                    "이름 등록",
+                    style: TextStyle(
+                      fontSize: setting.textSize - 2,
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
+                  ),
                   SizedBox(height: 8),
                   SizedBox(
                     width: 358,
@@ -76,19 +86,25 @@ class _Eatmed1State extends State<Eatmed1> {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "이름을 지어주세요! 예) 처방약, 비타민B",
-                        hintStyle: TextStyle(color: Colors.grey),
+                        hintStyle: TextStyle(color: Colors.grey, fontSize: setting.textSize - 2),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.grey),
                         ),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       ),
+                      style: TextStyle(fontSize: setting.textSize, color: colors.text),
                     ),
                   ),
                   SizedBox(height: 20),
-
-                  // 특징 등록
-                  Text("특징 등록", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(
+                    "특징 등록",
+                    style: TextStyle(
+                      fontSize: setting.textSize - 2,
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
+                  ),
                   SizedBox(height: 8),
                   SizedBox(
                     width: 358,
@@ -96,19 +112,17 @@ class _Eatmed1State extends State<Eatmed1> {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "특징을 등록해 주세요! 예) 동그란 통, 사각 통",
-                        hintStyle: TextStyle(color: Colors.grey),
+                        hintStyle: TextStyle(color: Colors.grey, fontSize: setting.textSize - 2),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.grey),
                         ),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       ),
+                      style: TextStyle(fontSize: setting.textSize, color: colors.text),
                     ),
                   ),
-
-                  Spacer(), // 버튼을 아래로 밀어줌
-
-                  // 버튼들
+                  Spacer(),
                   Column(
                     children: [
                       SizedBox(
@@ -116,13 +130,19 @@ class _Eatmed1State extends State<Eatmed1> {
                         height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF547EE8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            backgroundColor: colors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                           onPressed: () {},
                           child: Text(
                             "처방약 등록",
-                            style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: setting.textSize,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -132,22 +152,30 @@ class _Eatmed1State extends State<Eatmed1> {
                         height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF547EE8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            backgroundColor: colors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          onPressed: (){
+                          onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => RenewdayScreen()),
+                              MaterialPageRoute(
+                                builder: (context) => RenewdayScreen(),
+                              ),
                             );
                           },
                           child: Text(
                             "다음",
-                            style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: setting.textSize,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 20), // 마지막 여백 추가
+                      SizedBox(height: 20),
                     ],
                   ),
                 ],
