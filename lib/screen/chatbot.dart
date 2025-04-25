@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 
 class ChatBotScreen extends StatefulWidget {
@@ -16,61 +19,90 @@ class _ChatBotPageState extends State<ChatBotScreen> {
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = '말을 시작해보세요!';
+  String? _accessToken;
+  int? _chatSessionId;
 
   @override
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+    _loadTokenAndStartSession();
+  }
+
+
+  Future<void> _loadTokenAndStartSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    _accessToken = prefs.getString('token');
+
+    final res = await http.post(
+      Uri.parse('http://localhost:8080/api/chat/session'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+      },
+    );
+
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body);
+      _chatSessionId = data['id'];
+    } else {
+      print('세션 생성 실패: ${res.body}');
+    }
   }
 
   void _listen() async {
     if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('Status: $val'),
-        onError: (val) => print('Error: $val'),
-      );
+      bool available = await _speech.initialize();
       if (available) {
         setState(() => _isListening = true);
         _speech.listen(
-          /*
-          onResult: (val) => setState(() {
-            _text = val.recognizedWords;
-            print(_text);
-          }),
-
-           */
-          onResult: (val) {
+          onResult: (val) async {
             if (val.hasConfidenceRating && val.confidence > 0) {
               setState(() {
                 _isListening = false;
                 _speech.stop();
-                _text = val.recognizedWords;
-
-                /// 👇 메시지로 바로 추가
-                messages.add({'type': 'user', 'text': _text});
-                messages.add({'type': 'bot', 'text': '자동 응답: "$_text"에 대한 답변입니다.'});
-                _scrollToBottom();
               });
+              _sendMessageToServer(val.recognizedWords);
             }
           },
+          localeId: 'ko_KR',
+          listenMode: stt.ListenMode.dictation, // 🔥 연속 듣기 모드
+          pauseFor: Duration(seconds: 3),       // 🔥 3초 이상 정적이면 멈춤
+          partialResults: false,                // 🔥 부분 결과 무시
         );
       }
     } else {
       setState(() => _isListening = false);
       _speech.stop();
     }
-    print("함수 종료 전 출력되는 텍스트");
   }
 
-  void _sendMessage() {
-    String text = _controller.text.trim();
-    if (text.isNotEmpty) {
+  Future<void> _sendMessageToServer(String userMessage) async {
+    if (_chatSessionId == null || _accessToken == null) return;
+
+    setState(() {
+      messages.add({'type': 'user', 'text': userMessage});
+    });
+
+    final res = await http.post(
+      Uri.parse('http://localhost:8080/api/chat/message/$_chatSessionId'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'sender': 'USER',
+        'content': userMessage,
+      }),
+    );
+
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body);
       setState(() {
-        messages.add({'type': 'user', 'text': text});
-        messages.add({'type': 'bot', 'text': '자동 응답: "$text"에 대한 답변입니다.'});
+        messages.add({'type': 'bot', 'text': data['content']});
+        _scrollToBottom();
       });
-      _controller.clear();
-      _scrollToBottom();
+    } else {
+      print('서버 응답 실패: ${res.body}');
     }
   }
 
@@ -84,114 +116,121 @@ class _ChatBotPageState extends State<ChatBotScreen> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return
       Scaffold(
-          backgroundColor: Color(0xFFF6F6F6),
-          body: Stack(
-            children: [
-              Column(
-                children: [
+        backgroundColor: Color(0xFFF6F6F6),
+        body: Stack(
+          children: [
+            Column(
+              children: [
 
-                  // 상단 바
-                  Container(
-                    color: Color(0xFF547EE8),
-                    padding: EdgeInsets.only(top: 37, bottom: 12),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back, color: Colors.white),
-                          onPressed: () {
-                            Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+                // 상단 바
+                Container(
+                  color: Color(0xFF547EE8),
+                  padding: EdgeInsets.only(top: 37, bottom: 12),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () {
+                          Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
 
+                        },
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '챗봇',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.home, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 메시지 리스트
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      return msg['type'] == 'user'
+                          ? _buildUserMessage(msg['text']!)
+                          : _buildBotMessage(msg['text']!);
+                    },
+                  ),
+                ),
+
+                // 입력창 & 버튼
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: '메시지 입력...',
+                            filled: true,
+                            fillColor: Color(0xFFF6F6F6),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onSubmitted: (value) {
+                            _sendMessageToServer(value);
+                            _controller.clear();
                           },
                         ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              '챗봇',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.home, color: Colors.white),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        icon: Icon(Icons.send, color: Color(0xFF547EE8)),
+                        onPressed: () {
+                          _sendMessageToServer(_controller.text);
+                          _controller.clear();
+                        },
+                      ),
+                    ],
                   ),
+                ),
+              ],
+            ),
 
-                  // 메시지 리스트
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: EdgeInsets.all(16),
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        final msg = messages[index];
-                        return msg['type'] == 'user'
-                            ? _buildUserMessage(msg['text']!)
-                            : _buildBotMessage(msg['text']!);
-                      },
-                    ),
-                  ),
-
-                  // 입력창 & 버튼
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            // 중앙 음성 녹음 아이콘
+            Positioned(
+              bottom: 70,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: FloatingActionButton(
+                  backgroundColor: Color(0xFF547EE8),
+                  onPressed: _listen,
+                  child: Icon(
+                    _isListening ? Icons.mic_off : Icons.mic,
                     color: Colors.white,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              hintText: '메시지 입력...',
-                              filled: true,
-                              fillColor: Color(0xFFF6F6F6),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            onSubmitted: (value) => _sendMessage(),
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        IconButton(
-                          icon: Icon(Icons.send, color: Color(0xFF547EE8)),
-                          onPressed: _sendMessage,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              // 중앙 음성 녹음 아이콘
-              Positioned(
-                bottom: 70,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: FloatingActionButton(
-                    backgroundColor: Color(0xFF547EE8),
-                    onPressed: _listen,
-                    child: Icon(
-                      _isListening ? Icons.mic_off : Icons.mic,
-                      color: Colors.white,
-                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       );
 
   }
@@ -246,4 +285,543 @@ class _ChatBotPageState extends State<ChatBotScreen> {
     );
   }
 }
-//ㅎㅎ
+
+/*
+Widget _buildBotMessage(String message) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Color(0xFF547EE8),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(message, style: TextStyle(fontSize: 16, color: Colors.white)),
+      ),
+    );
+  }
+}
+
+ */
+
+
+/*
+
+import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+class ChatBotScreen extends StatefulWidget {
+  @override
+  _ChatBotPageState createState() => _ChatBotPageState();
+}
+
+class _ChatBotPageState extends State<ChatBotScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, String>> messages = [];
+  final ScrollController _scrollController = ScrollController();
+
+  // 음성인식을 위해 필요한 맴버변수
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = '말을 시작해보세요!';
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('Status: $val'),
+        onError: (val) => print('Error: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              setState(() {
+                _isListening = false;
+                _speech.stop();
+                _text = val.recognizedWords;
+                messages.add({'type': 'user', 'text': _text});
+                messages.add({'type': 'bot', 'text': '자동 응답: "$_text"에 대한 답변입니다.'});
+                _scrollToBottom();
+              });
+            }
+          },
+          listenFor: Duration(seconds: 10),
+          pauseFor: Duration(seconds: 3),
+          partialResults: false,
+          localeId: 'ko_KR',
+          cancelOnError: true,
+          listenMode: stt.ListenMode.dictation,
+        );
+      } //스피치부터 여기까지 수정한 이유가 그 웹으로 확인하는데 말 자꾸 잘라먹어서 내 말끝까지 들으라고 코드 추가함
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+    print("함수 종료 전 출력되는 텍스트");
+  }
+
+  void _sendMessage() {
+    String text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        messages.add({'type': 'user', 'text': text});
+        messages.add({'type': 'bot', 'text': '자동 응답: "$text"에 대한 답변입니다.'});
+      });
+      _controller.clear();
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(Duration(milliseconds: 100), () {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return
+      Scaffold(
+        backgroundColor: Color(0xFFF6F6F6),
+        body: Stack(
+          children: [
+            Column(
+              children: [
+
+                // 상단 바
+                Container(
+                  color: Color(0xFF547EE8),
+                  padding: EdgeInsets.only(top: 37, bottom: 12),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () {
+                          Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+
+                        },
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '챗봇',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.home, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 메시지 리스트
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      return msg['type'] == 'user'
+                          ? _buildUserMessage(msg['text']!)
+                          : _buildBotMessage(msg['text']!);
+                    },
+                  ),
+                ),
+
+                // 입력창 & 버튼
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: '메시지 입력...',
+                            filled: true,
+                            fillColor: Color(0xFFF6F6F6),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onSubmitted: (value) => _sendMessage(),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        icon: Icon(Icons.send, color: Color(0xFF547EE8)),
+                        onPressed: _sendMessage,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // 중앙 음성 녹음 아이콘
+            Positioned(
+              bottom: 70,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: FloatingActionButton(
+                  backgroundColor: Color(0xFF547EE8),
+                  onPressed: _listen,
+                  child: Icon(
+                    _isListening ? Icons.mic_off : Icons.mic,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  }
+
+  Widget _buildUserMessage(String message) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Color(0xFFDADADA),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          message,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBotMessage(String message) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Color(0xFF547EE8),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '음성답변',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              message,
+              style: TextStyle(fontSize: 14, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+ */
+
+/*
+Widget _buildBotMessage(String message) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Color(0xFF547EE8),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(message, style: TextStyle(fontSize: 16, color: Colors.white)),
+      ),
+    );
+  }
+}
+
+ */
+
+
+/*
+
+import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+class ChatBotScreen extends StatefulWidget {
+  @override
+  _ChatBotPageState createState() => _ChatBotPageState();
+}
+
+class _ChatBotPageState extends State<ChatBotScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, String>> messages = [];
+  final ScrollController _scrollController = ScrollController();
+
+  // 음성인식을 위해 필요한 맴버변수
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = '말을 시작해보세요!';
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('Status: $val'),
+        onError: (val) => print('Error: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              setState(() {
+                _isListening = false;
+                _speech.stop();
+                _text = val.recognizedWords;
+                messages.add({'type': 'user', 'text': _text});
+                messages.add({'type': 'bot', 'text': '자동 응답: "$_text"에 대한 답변입니다.'});
+                _scrollToBottom();
+              });
+            }
+          },
+          listenFor: Duration(seconds: 10),
+          pauseFor: Duration(seconds: 3),
+          partialResults: false,
+          localeId: 'ko_KR',
+          cancelOnError: true,
+          listenMode: stt.ListenMode.dictation,
+        );
+      } //스피치부터 여기까지 수정한 이유가 그 웹으로 확인하는데 말 자꾸 잘라먹어서 내 말끝까지 들으라고 코드 추가함
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+    print("함수 종료 전 출력되는 텍스트");
+  }
+
+  void _sendMessage() {
+    String text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        messages.add({'type': 'user', 'text': text});
+        messages.add({'type': 'bot', 'text': '자동 응답: "$text"에 대한 답변입니다.'});
+      });
+      _controller.clear();
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(Duration(milliseconds: 100), () {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return
+      Scaffold(
+        backgroundColor: Color(0xFFF6F6F6),
+        body: Stack(
+          children: [
+            Column(
+              children: [
+
+                // 상단 바
+                Container(
+                  color: Color(0xFF547EE8),
+                  padding: EdgeInsets.only(top: 37, bottom: 12),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () {
+                          Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
+
+                        },
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '챗봇',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.home, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 메시지 리스트
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      return msg['type'] == 'user'
+                          ? _buildUserMessage(msg['text']!)
+                          : _buildBotMessage(msg['text']!);
+                    },
+                  ),
+                ),
+
+                // 입력창 & 버튼
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: '메시지 입력...',
+                            filled: true,
+                            fillColor: Color(0xFFF6F6F6),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onSubmitted: (value) => _sendMessage(),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        icon: Icon(Icons.send, color: Color(0xFF547EE8)),
+                        onPressed: _sendMessage,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // 중앙 음성 녹음 아이콘
+            Positioned(
+              bottom: 70,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: FloatingActionButton(
+                  backgroundColor: Color(0xFF547EE8),
+                  onPressed: _listen,
+                  child: Icon(
+                    _isListening ? Icons.mic_off : Icons.mic,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  }
+
+  Widget _buildUserMessage(String message) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Color(0xFFDADADA),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          message,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBotMessage(String message) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Color(0xFF547EE8),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '음성답변',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              message,
+              style: TextStyle(fontSize: 14, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+ */
