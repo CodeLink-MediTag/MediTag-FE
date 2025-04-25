@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:untitled9/screen/renew.dart';
 import 'package:untitled9/screen/renewpo.dart';
 
+import 'eatmed1.dart';
 
+/*
 class RenewdayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -10,14 +14,23 @@ class RenewdayScreen extends StatelessWidget {
   }
 }
 
-class RenewScreen extends StatefulWidget {
+
+ */
+class RenewdayScreen extends StatefulWidget {
+
+  SelectionData selectionData;
+
+  RenewdayScreen({
+    super.key,
+    required this.selectionData
+});
   @override
-  _RenewState createState() => _RenewState();
+  _RenewdayScreenState createState() => _RenewdayScreenState();
 }
 
-class _RenewState extends State<RenewScreen> {
-  String? selectedTime = "아침";
-  String? selectedPeriod = "3일";
+class _RenewdayScreenState extends State<RenewdayScreen> {
+  int? selectedTime = 3;
+  int? selectedPeriod = 3;
   TextEditingController customDaysController = TextEditingController();
   DateTime selectedDate = DateTime.now();
 
@@ -37,6 +50,14 @@ class _RenewState extends State<RenewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 복용 기간 일자와 실제 일수를 구분하여 버튼을 생성하기 위한 리스트
+    final List<List<dynamic>> periods = [
+      ["3일", 3],
+      ["5일", 5],
+      ["1개월", 30],
+      ["1년", 365],
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -83,7 +104,7 @@ class _RenewState extends State<RenewScreen> {
                   Text("복용 주기", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Row(
-                    children: ["아침", "점심", "저녁"].map((time) {
+                    children: [1, 2, 3].map((time) {
                       return Row(
                         children: [
                           Radio(
@@ -91,11 +112,11 @@ class _RenewState extends State<RenewScreen> {
                             groupValue: selectedTime,
                             onChanged: (value) {
                               setState(() {
-                                selectedTime = value as String;
+                                selectedTime = value as int;
                               });
                             },
                           ),
-                          Text(time, style: TextStyle(fontSize: 14)),
+                          Text(time.toString(), style: TextStyle(fontSize: 14)),
                           SizedBox(width: 10),
                         ],
                       );
@@ -125,7 +146,7 @@ class _RenewState extends State<RenewScreen> {
                   Text("복용 기간", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Column(
-                    children: ["3일", "5일", "1개월", "1년", "매일"].map((period) {
+                    children: periods.map((period) {
                       return Padding(
                         padding: EdgeInsets.symmetric(vertical: 5),
                         child: Container(
@@ -136,12 +157,13 @@ class _RenewState extends State<RenewScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: RadioListTile(
-                            title: Text(period, style: TextStyle(fontSize: 20)),
-                            value: period,
+                            title: Text(period[0], style: TextStyle(fontSize: 20)),
+                            value: period[1],
                             groupValue: selectedPeriod,
                             onChanged: (value) {
+
                               setState(() {
-                                selectedPeriod = value as String;
+                                selectedPeriod = value as int;
                               });
                             },
                             activeColor: Colors.blue,
@@ -169,7 +191,14 @@ class _RenewState extends State<RenewScreen> {
                 onPressed: (){
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RenewpoScreen()),
+                    MaterialPageRoute(builder: (context) => RenewpoScreen(
+                      selectionData: widget.selectionData.copyWith( // 객체 속성에 이어서 값을 넣어 다음 페이지로 넘겨주기
+                        startDate: DateFormat('yyyy-MM-dd').format(selectedDate),
+                        duration: selectedPeriod,
+                        frequency: selectedTime,
+                        dosageTimes: ["아침", "점심", "저녁"],
+                      )
+                    )),
                   );
                 },
                 child: Text(

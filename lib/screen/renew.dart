@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled9/screen/eatmed1.dart';
 import 'package:untitled9/screen/renewday.dart';
 
 
@@ -10,12 +11,78 @@ class RenewScreen extends StatelessWidget {
   }
 }
 
+// 선택 데이터들을 수집하기 위해 필요한 클래스
+class SelectionData{
+  String? name;
+  String? characteristic;
+  String? startDate;
+  int? duration;
+  int? frequency;
+  String? imageUrl;
+  bool? prescribed;
+  List<String>? dosageTimes;
+  List<String>? alarmTimes;
+
+  SelectionData({
+    this.name,
+    this.characteristic,
+    this.startDate,
+    this.duration,
+    this.frequency,
+    this.imageUrl,
+    this.prescribed,
+    this.dosageTimes,
+    this.alarmTimes
+});
+  SelectionData copyWith({
+    String? name,
+    String? characteristic,
+    String? startDate,
+    int? duration,
+    int? frequency,
+    String? imageUrl,
+    bool? prescribed,
+    List<String>? dosageTimes,
+    List<String>? alarmTimes,
+}){
+    return SelectionData(
+      name: name ?? this.name,
+      characteristic: characteristic ?? this.characteristic,
+      startDate: startDate ?? this.startDate,
+      duration: duration ?? this.duration,
+      frequency: frequency ?? this.frequency,
+      imageUrl: imageUrl ?? this.imageUrl,
+      prescribed: prescribed ?? this.prescribed,
+      dosageTimes: dosageTimes?? this.dosageTimes,
+      alarmTimes: alarmTimes ?? this.alarmTimes
+    );
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "SelectionData(name: $name,"
+        " characteristic: $characteristic,"
+        " startDate: $startDate,"
+        " duration: $duration,"
+        " frequency: $frequency,"
+        " imageUrl: $imageUrl,"
+        " prescribed: $prescribed,"
+        " dosageTimes: $dosageTimes,"
+        " alarmTimes: $alarmTimes";
+  }
+}
 class Eatmed1 extends StatefulWidget {
   @override
   _Eatmed1State createState() => _Eatmed1State();
 }
 
 class _Eatmed1State extends State<Eatmed1> {
+
+  // 텍스트 입력값 가져오기 위한 컨트롤러
+  final TextEditingController medicineName = TextEditingController();
+  final TextEditingController characteristic = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,6 +141,7 @@ class _Eatmed1State extends State<Eatmed1> {
                     width: 358,
                     height: 48,
                     child: TextField(
+                      controller: medicineName, // 약 이름 입력값 가져오기
                       decoration: InputDecoration(
                         hintText: "이름을 지어주세요! 예) 처방약, 비타민B",
                         hintStyle: TextStyle(color: Colors.grey),
@@ -94,6 +162,7 @@ class _Eatmed1State extends State<Eatmed1> {
                     width: 358,
                     height: 48,
                     child: TextField(
+                      controller: characteristic, // 특징 입력값 가져오기
                       decoration: InputDecoration(
                         hintText: "특징을 등록해 주세요! 예) 동그란 통, 사각 통",
                         hintStyle: TextStyle(color: Colors.grey),
@@ -136,9 +205,17 @@ class _Eatmed1State extends State<Eatmed1> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                           onPressed: (){
+                            // 입력받은 값 가져와서 객체에 담아 다음 페이지로 넘겨주기
+                            final medicineNameInput = medicineName.text;
+                            final characteristicInput = characteristic.text;
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => RenewdayScreen()),
+                              MaterialPageRoute(builder: (context) => RenewdayScreen(
+                                selectionData: SelectionData(
+                                  name: medicineNameInput,
+                                  characteristic: characteristicInput
+                                ),
+                              )),
                             );
                           },
                           child: Text(
