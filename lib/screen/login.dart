@@ -144,7 +144,7 @@ class _Input extends StatelessWidget{
   }
 
   Future<void> loginUser(BuildContext context) async {
-    var url = Uri.parse('http://192.168.219.101:8080/api/auth/login');
+    var url = Uri.parse('http://172.30.1.37:8080/api/auth/login');
 
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({

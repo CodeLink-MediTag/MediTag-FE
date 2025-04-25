@@ -134,7 +134,7 @@ class _Eatmed1State extends State<Eatmed1> with RouteAware{
 
       // HTTP GET 요청을 보내 약 정보를 가져옴
       final response = await http.get(
-        Uri.parse('http://192.168.219.101:8080/api/medicines?date=$today'),
+        Uri.parse('http://172.30.1.37:8080/api/medicines?date=$today'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

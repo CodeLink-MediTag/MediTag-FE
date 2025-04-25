@@ -89,7 +89,8 @@ class _RenewpoScreenState extends State<RenewpoScreen> {
     this.alarmTimes = dateTimeList.map((dateTime){
       String str = dateTime.toIso8601String();
       return
-        str.split(".")[0]
+        str.split(".")[0].split("T")[1]
+
       ;
     }).toList();
   }
@@ -100,7 +101,7 @@ class _RenewpoScreenState extends State<RenewpoScreen> {
 
 
 
-    final uri = Uri.parse('http://192.168.219.101:8080/api/medicines'); // ✅ 실제 주소로 수정
+    final uri = Uri.parse('http://172.30.1.37:8080/api/medicines'); // ✅ 실제 주소로 수정
     var request = http.MultipartRequest("POST", uri);
 
     // ✅ 토큰 유효성검사
