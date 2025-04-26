@@ -4,8 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled9/screen/eatmed1.dart';
 import 'package:untitled9/screen/main.dart';
 import 'package:untitled9/screen/account.dart';
+
+// 전역에서 사용할 라우터 옵저버
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 class Login extends StatelessWidget{
 
@@ -14,6 +18,14 @@ class Login extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // 라우트 옵저버에 필요한 거
+      navigatorObservers: [routeObserver], // 요거 추가!
+      // 라우트 등록
+      initialRoute: '/',
+      routes: {
+        '/': (context) => HomeScreen(),
+        '/A': (context) => Eatmed1()
+      },
       debugShowCheckedModeBanner: false, // 디버그 배너를 숨깁니다.
       theme: ThemeData(
           scaffoldBackgroundColor: Colors.white, // 전체 배경 흰색
@@ -52,15 +64,7 @@ class Login extends StatelessWidget{
               )
           )
       ),
-      home: Scaffold(
-          body: SafeArea(
-            top: true,
-            bottom: false,
-            child: Center(
-              child: HomeScreen(),
-            ),
-          )
-      ),
+
     );
   }
 }
@@ -72,22 +76,31 @@ class HomeScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return
-      Padding(
-        // padding: EdgeInsets.only(left: 13, right: 13),
-          padding: const EdgeInsets.all(16.0),
-          child:
-          Container(
-            // color: Colors.red,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Title(),
-                _Input()
-              ],
+      Scaffold(
+          body: SafeArea(
+            top: true,
+            bottom: false,
+            child: Center(
+              child: Padding(
+                // padding: EdgeInsets.only(left: 13, right: 13),
+                  padding: const EdgeInsets.all(16.0),
+                  child:
+                  Container(
+                    // color: Colors.red,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _Title(),
+                        _Input()
+                      ],
+                    ),
+                  )
+
+              )
             ),
           )
-
       )
+
     ;
   }
 }
@@ -134,7 +147,8 @@ class _Input extends StatelessWidget{
     // 서버 반환값
     String responseText = '';
 
-    var url = Uri.parse('http://localhost:8080/api/auth/login');
+    var url = Uri.parse('http://아이피주소:8080/api/auth/login');
+
 
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
