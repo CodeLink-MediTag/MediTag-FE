@@ -13,7 +13,8 @@ class SignupScreen extends StatelessWidget {
   String responseText = '';
 
   Future<void> registration(BuildContext context) async{
-    var url = Uri.parse('http://172.30.1.37:8080/api/member/register');
+
+    var url = Uri.parse('http://아이피주소:8080/api/member/register');
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
       "username": usernameController.text,
@@ -139,3 +140,4 @@ class SignupScreen extends StatelessWidget {
     );
   }
 }
+//ㅎㅎ
