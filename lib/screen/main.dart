@@ -90,10 +90,8 @@ class MainScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     _buildButton('복용 알림/여부', (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Eatmed1()),
-                      );
+                      // 약 등록 후 renew페이지로 바로 돌아오기 위해서 이름을 지정해주기
+                      Navigator.pushNamed(context, '/A'); // A 페이지로 이동
                     }),
                     _buildButton('주의사항 녹음', (){
                       Navigator.push(
