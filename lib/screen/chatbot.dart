@@ -35,7 +35,7 @@ class _ChatBotPageState extends State<ChatBotScreen> {
     _accessToken = prefs.getString('token');
 
     final res = await http.post(
-      Uri.parse('http://localhost:8080/api/chat/session'),
+      Uri.parse('http://아이피주소:8080/api/chat/session'),
       headers: {
         'Authorization': 'Bearer $_accessToken',
       },
@@ -84,7 +84,7 @@ class _ChatBotPageState extends State<ChatBotScreen> {
     });
 
     final res = await http.post(
-      Uri.parse('http://localhost:8080/api/chat/message/$_chatSessionId'),
+      Uri.parse('http://아이피주소:8080/api/chat/message/$_chatSessionId'),
       headers: {
         'Authorization': 'Bearer $_accessToken',
         'Content-Type': 'application/json',

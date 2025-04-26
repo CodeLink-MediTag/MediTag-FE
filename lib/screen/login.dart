@@ -246,7 +246,7 @@ class _Input extends StatelessWidget{
       // 서버 반환값
       String responseText = '';
 
-      var url = Uri.parse('http://192.168.219.102:8080/api/auth/kakao-login');
+      var url = Uri.parse('http://아이피주소:8080/api/auth/kakao-login');
 
       var headers = {"Content-Type": "application/json"};
       var body = jsonEncode({

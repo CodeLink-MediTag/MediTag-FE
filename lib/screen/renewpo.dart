@@ -101,7 +101,7 @@ class _RenewpoScreenState extends State<RenewpoScreen> {
 
 
 
-    final uri = Uri.parse('http://172.30.1.37:8080/api/medicines'); // ✅ 실제 주소로 수정
+    final uri = Uri.parse('http://아이피주소:8080/api/medicines'); // ✅ 실제 주소로 수정
     var request = http.MultipartRequest("POST", uri);
 
     // ✅ 토큰 유효성검사
