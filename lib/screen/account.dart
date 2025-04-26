@@ -14,7 +14,7 @@ class SignupScreen extends StatelessWidget {
 
   Future<void> registration(BuildContext context) async{
 
-    var url = Uri.parse('http://아이피주소:8080/api/member/register');
+    var url = Uri.parse('http://192.168.219.108:8080/api/member/register');
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
       "username": usernameController.text,
@@ -26,9 +26,9 @@ class SignupScreen extends StatelessWidget {
     try{
       var response = await http.post(url, headers: headers, body: body);
       var data = jsonDecode(response.body);
-      responseText = data.toString();
+      responseText = data['message'].toString();
       if (response.statusCode == 200) {
-        await showPopupAndWait(context, "회원가입 성공");
+        await showPopupAndWait(context, "회원가입이 성공");
         Navigator.pop(context); // 현재 화면 종료 (이전 화면으로 돌아감)
       }else{
         await showPopupAndWait(context, "회원가입 실패");
@@ -44,7 +44,7 @@ class SignupScreen extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
-          content: Text('서버 반환 내용:\n$responseText'),
+          content: Text('$responseText'),
           actions: [
             TextButton(
               onPressed: () {

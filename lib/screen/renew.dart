@@ -180,6 +180,7 @@ class _Eatmed1State extends State<Eatmed1> {
                   // 버튼들
                   Column(
                     children: [
+                      /*
                       SizedBox(
                         width: 358,
                         height: 48,
@@ -195,6 +196,8 @@ class _Eatmed1State extends State<Eatmed1> {
                           ),
                         ),
                       ),
+
+                       */
                       SizedBox(height: 10),
                       SizedBox(
                         width: 358,

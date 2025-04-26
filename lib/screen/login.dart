@@ -147,7 +147,7 @@ class _Input extends StatelessWidget{
     // 서버 반환값
     String responseText = '';
 
-    var url = Uri.parse('http://아이피주소:8080/api/auth/login');
+    var url = Uri.parse('http://192.168.219.108:8080/api/auth/login');
 
 
     var headers = {"Content-Type": "application/json"};
@@ -162,7 +162,7 @@ class _Input extends StatelessWidget{
         var data = jsonDecode(response.body);
         String token = data['accessToken'];
         responseText = data.toString();
-        await showPopupAndWait(context, "로그인 성공", responseText);
+        // await showPopupAndWait(context, "로그인 성공", responseText);
         // SharedPreferences에 토큰 저장
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', token);
@@ -171,9 +171,8 @@ class _Input extends StatelessWidget{
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } else {
-        var data = jsonDecode(response.body);
-        responseText = data.toString();
-        await showPopupAndWait(context, "로그인 실패", responseText);
+        var responseMessage = jsonDecode(response.body)['message'];
+        await showPopupAndWait(context, "로그인 실패", responseMessage);
       }
     } catch (e, stackTrace) {
       await showPopupAndWait(context, "에러발생 $e", responseText);
@@ -187,7 +186,7 @@ class _Input extends StatelessWidget{
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
-          content: Text('내용:\n$content'),
+          content: Text('\n$content'),
           actions: [
             TextButton(
               onPressed: () {
@@ -246,7 +245,7 @@ class _Input extends StatelessWidget{
       // 서버 반환값
       String responseText = '';
 
-      var url = Uri.parse('http://아이피주소:8080/api/auth/kakao-login');
+      var url = Uri.parse('http://192.168.219.108:8080/api/auth/kakao-login');
 
       var headers = {"Content-Type": "application/json"};
       var body = jsonEncode({
@@ -259,7 +258,7 @@ class _Input extends StatelessWidget{
           var data = jsonDecode(response.body);
           String token = data['accessToken'];
           responseText = data.toString();
-          await showPopupAndWait(context, "로그인 성공", responseText);
+          // await showPopupAndWait(context, "로그인 성공", responseText);
           // SharedPreferences에 토큰 저장
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString('token', token);
