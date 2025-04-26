@@ -8,6 +8,8 @@ import 'package:untitled9/screen/eatmed1.dart';
 import 'package:untitled9/screen/main.dart';
 import 'package:untitled9/screen/account.dart';
 
+import '../ip/ip.dart';
+
 // 전역에서 사용할 라우터 옵저버
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
@@ -147,7 +149,7 @@ class _Input extends StatelessWidget{
     // 서버 반환값
     String responseText = '';
 
-    var url = Uri.parse('http://192.168.219.108:8080/api/auth/login');
+    var url = Uri.parse('http://$gIpAddress:8080/api/auth/login');
 
 
     var headers = {"Content-Type": "application/json"};
@@ -245,7 +247,7 @@ class _Input extends StatelessWidget{
       // 서버 반환값
       String responseText = '';
 
-      var url = Uri.parse('http://192.168.219.108:8080/api/auth/kakao-login');
+      var url = Uri.parse('http://$gIpAddress:8080/api/auth/kakao-login');
 
       var headers = {"Content-Type": "application/json"};
       var body = jsonEncode({

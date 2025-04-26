@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:untitled9/ip/ip.dart';
 
 class SignupScreen extends StatelessWidget {
 
@@ -14,7 +15,7 @@ class SignupScreen extends StatelessWidget {
 
   Future<void> registration(BuildContext context) async{
 
-    var url = Uri.parse('http://192.168.219.108:8080/api/member/register');
+    var url = Uri.parse('http://$gIpAddress}:8080/api/member/register');
     var headers = {"Content-Type": "application/json"};
     var body = jsonEncode({
       "username": usernameController.text,
