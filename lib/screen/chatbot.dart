@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:untitled9/ip/ip.dart';
+
 
 class ChatBotScreen extends StatefulWidget {
   @override
@@ -35,7 +37,7 @@ class _ChatBotPageState extends State<ChatBotScreen> {
     _accessToken = prefs.getString('token');
 
     final res = await http.post(
-      Uri.parse('http://아이피주소:8080/api/chat/session'),
+      Uri.parse('http://$gIpAddress:8080/api/chat/session'),
       headers: {
         'Authorization': 'Bearer $_accessToken',
       },
@@ -84,7 +86,7 @@ class _ChatBotPageState extends State<ChatBotScreen> {
     });
 
     final res = await http.post(
-      Uri.parse('http://아이피주소:8080/api/chat/message/$_chatSessionId'),
+      Uri.parse('http://$gIpAddress:8080/api/chat/message/$_chatSessionId'),
       headers: {
         'Authorization': 'Bearer $_accessToken',
         'Content-Type': 'application/json',

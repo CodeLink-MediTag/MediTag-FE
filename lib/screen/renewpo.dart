@@ -11,6 +11,8 @@ import 'package:untitled9/screen/eatmed1.dart';
 import 'package:untitled9/screen/renew.dart';
 import 'package:http_parser/http_parser.dart';
 
+import '../ip/ip.dart';
+
 /*
 class RenewpoScreen extends StatelessWidget {
   const RenewpoScreen({super.key});
@@ -101,7 +103,7 @@ class _RenewpoScreenState extends State<RenewpoScreen> {
 
 
 
-    final uri = Uri.parse('http://아이피주소:8080/api/medicines'); // ✅ 실제 주소로 수정
+    final uri = Uri.parse('http://$gIpAddress:8080/api/medicines'); // ✅ 실제 주소로 수정
     var request = http.MultipartRequest("POST", uri);
 
     // ✅ 토큰 유효성검사
